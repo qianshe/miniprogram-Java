@@ -1,9 +1,12 @@
 package com.funeral.service.impl;
 
+import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.funeral.dto.OrderDTO;
+import com.funeral.dto.OrderExportDTO;
 import com.funeral.dto.OrderItemDTO;
+import com.funeral.dto.OrderStatisticsDTO;
 import com.funeral.entity.Orders;
 import com.funeral.entity.OrderDetail;
 import com.funeral.entity.Product;
@@ -11,21 +14,29 @@ import com.funeral.mapper.OrderMapper;
 import com.funeral.mapper.OrderDetailMapper;
 import com.funeral.mapper.ProductMapper;
 import com.funeral.service.OrderService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
-    
+
     @Resource
     private OrderMapper orderMapper;
-    
+
     @Resource
     private OrderDetailMapper orderDetailMapper;
-    
+
     @Resource
     private ProductMapper productMapper;
 
@@ -34,7 +45,7 @@ public class OrderServiceImpl implements OrderService {
     public String createOrder(Long userId, OrderDTO orderDTO) {
         // 生成订单号
         String orderNo = UUID.randomUUID().toString().replace("-", "");
-        
+
         // 计算订单总金额
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (OrderItemDTO item : orderDTO.getItems()) {
@@ -46,11 +57,11 @@ public class OrderServiceImpl implements OrderService {
                 throw new RuntimeException("商品库存不足");
             }
             totalAmount = totalAmount.add(product.getPrice().multiply(new BigDecimal(item.getQuantity())));
-            
+
             // 扣减库存
             product.setStock(product.getStock() - item.getQuantity());
             productMapper.updateById(product);
-            
+
             // 保存订单详情
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrderId(orderNo);
@@ -60,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
             orderDetail.setQuantity(item.getQuantity());
             orderDetailMapper.insert(orderDetail);
         }
-        
+
         // 保存订单
         Orders order = new Orders();
         order.setOrderNo(orderNo);
@@ -73,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
         order.setServiceTime(orderDTO.getServiceTime());
         order.setRemark(orderDTO.getRemark());
         orderMapper.insert(order);
-        
+
         return orderNo;
     }
 
@@ -118,4 +129,84 @@ public class OrderServiceImpl implements OrderService {
         wrapper.orderByDesc(Orders::getCreatedTime);
         return orderMapper.selectPage(pageParam, wrapper);
     }
+
+    @Override
+    public OrderStatisticsDTO getOrderStatistics(LocalDateTime startTime, LocalDateTime endTime) {
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+        wrapper.between(startTime != null && endTime != null,
+                Orders::getCreatedTime, startTime, endTime);
+
+        List<Orders> orders = orderMapper.selectList(wrapper);
+
+        OrderStatisticsDTO statistics = new OrderStatisticsDTO();
+        statistics.setTotalOrders(orders.size());
+        statistics.setPendingPaymentOrders((int) orders.stream().filter(o -> o.getStatus() == 0).count());
+        statistics.setPaidOrders((int) orders.stream().filter(o -> o.getStatus() == 1).count());
+        statistics.setCancelledOrders((int) orders.stream().filter(o -> o.getStatus() == 2).count());
+        statistics.setTotalIncome(orders.stream()
+                .filter(o -> o.getStatus() == 1)
+                .map(Orders::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        return statistics;
+    }
+
+    @Override
+    public void exportOrders(LocalDateTime startTime, LocalDateTime endTime, HttpServletResponse response) throws IOException {
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+        wrapper.between(startTime != null && endTime != null,
+                Orders::getCreatedTime, startTime, endTime);
+
+        List<Orders> orders = orderMapper.selectList(wrapper);
+        List<OrderExportDTO> exportList = new ArrayList<>();
+
+        for (Orders order : orders) {
+            OrderExportDTO exportDTO = new OrderExportDTO();
+            BeanUtils.copyProperties(order, exportDTO);
+
+            // 设置状态描述
+            String status = null;
+            switch (order.getStatus()) {
+                case 0 :
+                    status = "待支付";
+                    break;
+                case 1 :
+                    status = "已支付";
+                    break;
+                case 2 :
+                    status = "已取消";
+                    break;
+                case 3 :
+                    status = "已完成";
+                    break;
+                default :
+                    status = "未知状态";
+            };
+
+            exportDTO.setStatus(status);
+
+            // 获取订单详情
+            LambdaQueryWrapper<OrderDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(OrderDetail::getOrderId, order.getOrderNo());
+            List<OrderDetail> details = orderDetailMapper.selectList(detailWrapper);
+
+            // 组装商品明细
+            String productDetails = details.stream()
+                    .map(detail -> String.format("%s x%d", detail.getProductName(), detail.getQuantity()))
+                    .collect(Collectors.joining(", "));
+            exportDTO.setProductDetails(productDetails);
+
+            exportList.add(exportDTO);
+        }
+
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("订单数据", "UTF-8");
+        response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
+
+        EasyExcel.write(response.getOutputStream(), OrderExportDTO.class)
+                .sheet("订单数据")
+                .doWrite(exportList);
+    }
+
 } 
