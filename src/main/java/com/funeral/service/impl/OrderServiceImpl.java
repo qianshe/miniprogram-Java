@@ -14,6 +14,7 @@ import com.funeral.mapper.OrderMapper;
 import com.funeral.mapper.OrderDetailMapper;
 import com.funeral.mapper.ProductMapper;
 import com.funeral.service.OrderService;
+import com.funeral.vo.OrderItemVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,8 @@ import java.util.UUID;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.funeral.vo.OrderListVO;
+import com.funeral.vo.OrderDetailVO;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -122,12 +125,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<Orders> listUserOrders(Long userId, Integer page, Integer size) {
+    public Page<OrderListVO> listUserOrders(Long userId, Integer page, Integer size) {
         Page<Orders> pageParam = new Page<>(page, size);
         LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Orders::getUserId, userId);
         wrapper.orderByDesc(Orders::getCreatedTime);
-        return orderMapper.selectPage(pageParam, wrapper);
+        
+        Page<Orders> ordersPage = orderMapper.selectPage(pageParam, wrapper);
+        
+        // 转换为VO对象
+        Page<OrderListVO> voPage = new Page<>();
+        BeanUtils.copyProperties(ordersPage, voPage, "records");
+        
+        List<OrderListVO> voList = ordersPage.getRecords().stream()
+                .map(order -> {
+                    OrderListVO vo = new OrderListVO();
+                    BeanUtils.copyProperties(order, vo);
+                    return vo;
+                })
+                .collect(Collectors.toList());
+        
+        voPage.setRecords(voList);
+        return voPage;
     }
 
     @Override
@@ -207,6 +226,37 @@ public class OrderServiceImpl implements OrderService {
         EasyExcel.write(response.getOutputStream(), OrderExportDTO.class)
                 .sheet("订单数据")
                 .doWrite(exportList);
+    }
+
+    @Override
+    public OrderDetailVO getOrderDetail(String orderNo) {
+        // 查询订单信息
+        Orders order = getOrder(orderNo);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        
+        // 查询订单商品信息
+        LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderDetail::getOrderId, orderNo);
+        List<OrderDetail> details = orderDetailMapper.selectList(wrapper);
+        
+        // 转换为VO对象
+        OrderDetailVO vo = new OrderDetailVO();
+        BeanUtils.copyProperties(order, vo);
+        
+        List<OrderItemVO> items = details.stream()
+                .map(detail -> {
+                    OrderItemVO item = new OrderItemVO();
+                    BeanUtils.copyProperties(detail, item);
+                    item.setSubtotal(detail.getProductPrice()
+                            .multiply(new BigDecimal(detail.getQuantity())));
+                    return item;
+                })
+                .collect(Collectors.toList());
+        
+        vo.setItems(items);
+        return vo;
     }
 
 } 

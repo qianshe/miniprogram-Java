@@ -9,7 +9,7 @@ mvn clean package
 
 构建Docker镜像：
 ```bash
-docker build -t qianshe-miniprogram:1.0 .
+docker build -t qianshe-api:0.0.1 .
 ```
 
 ## 部署参数说明

@@ -14,6 +14,8 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import javax.servlet.http.HttpServletResponse;
+import com.funeral.vo.OrderListVO;
+import com.funeral.vo.OrderDetailVO;
 
 @Api(tags = "订单管理接口")
 @RestController
@@ -48,13 +50,13 @@ public class OrderController {
 
     @ApiOperation("获取订单详情")
     @GetMapping("/{orderNo}")
-    public Result<Orders> getOrder(@ApiParam("订单号") @PathVariable String orderNo) {
-        return Result.success(orderService.getOrder(orderNo));
+    public Result<OrderDetailVO> getOrderDetail(@ApiParam("订单号") @PathVariable String orderNo) {
+        return Result.success(orderService.getOrderDetail(orderNo));
     }
 
     @ApiOperation("查询用户订单列表")
     @GetMapping("/user/{userId}")
-    public Result<Page<Orders>> listUserOrders(
+    public Result<Page<OrderListVO>> listUserOrders(
             @ApiParam("用户ID") @PathVariable Long userId,
             @ApiParam("页码") @RequestParam(defaultValue = "1") Integer page,
             @ApiParam("每页数量") @RequestParam(defaultValue = "10") Integer size) {
