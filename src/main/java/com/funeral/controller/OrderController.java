@@ -59,8 +59,9 @@ public class OrderController {
     public Result<Page<OrderListVO>> listUserOrders(
             @ApiParam("用户ID") @PathVariable Long userId,
             @ApiParam("页码") @RequestParam(defaultValue = "1") Integer page,
-            @ApiParam("每页数量") @RequestParam(defaultValue = "10") Integer size) {
-        return Result.success(orderService.listUserOrders(userId, page, size));
+            @ApiParam("每页数量") @RequestParam(defaultValue = "10") Integer size,
+            @ApiParam("订单状态") @RequestParam(required = false) Long orderStatus) {
+        return Result.success(orderService.listUserOrders(userId, orderStatus, page, size));
     }
 
     @ApiOperation("获取订单统计信息")
@@ -79,4 +80,4 @@ public class OrderController {
             HttpServletResponse response) throws IOException {
         orderService.exportOrders(startTime, endTime, response);
     }
-} 
+}

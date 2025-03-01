@@ -125,10 +125,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderListVO> listUserOrders(Long userId, Integer page, Integer size) {
+    public Page<OrderListVO> listUserOrders(Long userId, Long orderStatus, Integer page, Integer size) {
         Page<Orders> pageParam = new Page<>(page, size);
         LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Orders::getUserId, userId);
+        // 校验 订单状态
+        if (orderStatus != null) {
+            wrapper.eq(Orders::getStatus, orderStatus);
+        }
         wrapper.orderByDesc(Orders::getCreatedTime);
         
         Page<Orders> ordersPage = orderMapper.selectPage(pageParam, wrapper);

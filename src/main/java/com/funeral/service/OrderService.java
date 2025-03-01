@@ -15,7 +15,7 @@ public interface OrderService {
     void cancelOrder(String orderNo);
     void payOrder(String orderNo);
     Orders getOrder(String orderNo);
-    Page<OrderListVO> listUserOrders(Long userId, Integer page, Integer size);
+    Page<OrderListVO> listUserOrders(Long userId, Long orderStatus, Integer page, Integer size);
     OrderStatisticsDTO getOrderStatistics(LocalDateTime startTime, LocalDateTime endTime);
     void exportOrders(LocalDateTime startTime, LocalDateTime endTime, HttpServletResponse response) throws IOException;
     OrderDetailVO getOrderDetail(String orderNo);

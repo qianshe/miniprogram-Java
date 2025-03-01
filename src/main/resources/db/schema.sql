@@ -2,10 +2,31 @@
 CREATE DATABASE IF NOT EXISTS funeral_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 USE funeral_db;
+-- 角色表
+CREATE TABLE role (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) COMMENT '角色名称',
+    code VARCHAR(50) UNIQUE COMMENT '角色编码',
+    description VARCHAR(255) COMMENT '角色描述',
+    status TINYINT DEFAULT 1 COMMENT '状态 0-禁用 1-正常',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+);
+
+-- 用户角色关联表
+CREATE TABLE user_role (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT COMMENT '用户ID',
+    role_id BIGINT COMMENT '角色ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_role_id (role_id)
+);
 
 -- 用户表
 CREATE TABLE user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    unionid VARCHAR(64) COMMENT '微信unionId',
     openid VARCHAR(64) NOT NULL COMMENT '微信openid',
     nickname VARCHAR(32) COMMENT '用户昵称',
     avatar_url VARCHAR(255) COMMENT '头像URL',
@@ -93,4 +114,5 @@ INSERT INTO category (name, sort) VALUES
 ('殡葬用品', 1),
 ('花圈花篮', 2),
 ('殡葬服务', 3),
-('代办服务', 4); 
+('代办服务', 4);
+
