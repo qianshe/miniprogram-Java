@@ -24,6 +24,8 @@ public class Product {
     private Integer stock;
     
     private Integer status;
+
+    private Boolean isRecommended;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;

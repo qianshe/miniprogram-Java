@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -56,4 +57,15 @@ public class ProductServiceImpl implements ProductService {
         wrapper.orderByDesc(Product::getCreatedTime);
         return productMapper.selectPage(pageParam, wrapper);
     }
-} 
+
+    @Override
+    public List<Product> getRecommendedProducts() {
+        // 这里可以根据具体业务逻辑来实现推荐算法
+        // 示例实现：获取置顶的商品作为推荐商品
+        LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Product::getIsRecommended, true)
+                   .orderByDesc(Product::getCreatedTime)
+                   .last("LIMIT 10");
+        return productMapper.selectList(queryWrapper);
+    }
+}

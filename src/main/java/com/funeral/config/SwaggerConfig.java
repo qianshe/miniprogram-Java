@@ -28,7 +28,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("丧葬服务管理系统接口文档")
                 .description("提供丧葬服务相关接口")
-                .contact(new Contact("开发团队", "", ""))
+                .contact(new Contact("开发团队", "qianshe", ""))
                 .version("1.0")
                 .build();
     }
