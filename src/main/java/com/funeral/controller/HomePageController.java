@@ -16,7 +16,7 @@ import java.util.List;
 
 @Api(tags = "首页接口")
 @RestController
-@RequestMapping("/api/homepage")
+@RequestMapping("/api/process")
 public class HomePageController {
 
     @Resource
@@ -26,7 +26,7 @@ public class HomePageController {
     private ProductService productService;
 
     @ApiOperation("获取白事流程")
-    @GetMapping("/funeral-process")
+    @GetMapping("/white/steps")
     public Result<List<FuneralProcess>> getFuneralProcess() {
         return Result.success(funeralProcessService.getAllProcess());
     }
