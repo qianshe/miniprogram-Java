@@ -3,14 +3,14 @@ package com.funeral.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.funeral.entity.FuneralProcess;
 import com.funeral.mapper.FuneralProcessMapper;
-import com.funeral.service.FuneralProcessService;
+import com.funeral.service.ProcessService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-public class FuneralProcessServiceImpl implements FuneralProcessService {
+public class FuneralProcessServiceImpl implements ProcessService {
 
     @Resource
     private FuneralProcessMapper funeralProcessMapper;

@@ -3,7 +3,7 @@ package com.funeral.service;
 import com.funeral.entity.FuneralProcess;
 import java.util.List;
 
-public interface FuneralProcessService {
+public interface ProcessService {
     /**
      * 获取所有白事流程
      * @return 白事流程列表
