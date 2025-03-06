@@ -3,7 +3,7 @@ package com.funeral.controller;
 import com.funeral.common.Result;
 import com.funeral.entity.FuneralProcess;
 import com.funeral.entity.Product;
-import com.funeral.service.FuneralProcessService;
+import com.funeral.service.ProcessService;
 import com.funeral.service.ProductService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,7 +20,7 @@ import java.util.List;
 public class HomePageController {
 
     @Resource
-    private FuneralProcessService funeralProcessService;
+    private ProcessService funeralProcessService;
 
     @Resource
     private ProductService productService;
