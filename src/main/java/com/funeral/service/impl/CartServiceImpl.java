@@ -4,6 +4,7 @@ import com.funeral.dto.CartDTO;
 import com.funeral.entity.Product;
 import com.funeral.service.CartService;
 import com.funeral.service.ProductService;
+import com.funeral.vo.CartItemVO;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
