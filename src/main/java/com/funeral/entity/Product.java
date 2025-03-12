@@ -25,6 +25,8 @@ public class Product {
     
     private Integer status;
 
+    // 忽略推荐字段
+    @TableField(exist = false)
     private Boolean isRecommended;
     
     @TableField(fill = FieldFill.INSERT)

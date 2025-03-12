@@ -16,7 +16,7 @@ import java.util.List;
 
 @Api(tags = "首页接口")
 @RestController
-@RequestMapping("/api/process")
+@RequestMapping("/api/index")
 public class HomePageController {
 
     @Resource
