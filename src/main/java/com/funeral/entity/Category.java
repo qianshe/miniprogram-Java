@@ -12,6 +12,8 @@ public class Category {
     
     private String name;
     
+    private Integer type;
+    
     private Integer sort;
     
     @TableField(fill = FieldFill.INSERT)

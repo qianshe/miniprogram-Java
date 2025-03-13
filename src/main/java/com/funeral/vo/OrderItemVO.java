@@ -1,11 +1,13 @@
 package com.funeral.vo;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@ApiModel("订单商品信息")
 public class OrderItemVO {
     @ApiModelProperty("商品ID")
     private Long productId;

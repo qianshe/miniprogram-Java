@@ -75,12 +75,14 @@ CREATE TABLE orders (
     address VARCHAR(255) COMMENT '服务地址',
     service_time DATETIME COMMENT '服务时间',
     remark VARCHAR(255) COMMENT '备注',
+    delivery_type TINYINT NOT NULL DEFAULT 0 COMMENT '配送方式：0-自提 1-配送',
+    qr_code_url TEXT COMMENT '二维码URL',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
     UNIQUE KEY uk_order_no (order_no),
     KEY idx_user (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单表'; 
 
 -- 订单详情表
 CREATE TABLE order_detail (
@@ -115,4 +117,17 @@ INSERT INTO category (name, sort) VALUES
 ('花圈花篮', 2),
 ('殡葬服务', 3),
 ('代办服务', 4);
+
+-- 流程步骤表
+CREATE TABLE process_step (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    type TINYINT NOT NULL COMMENT '流程类型：0-白事 1-红事',
+    step_name VARCHAR(50) NOT NULL COMMENT '步骤名称',
+    description TEXT COMMENT '详细说明',
+    product_ids TEXT COMMENT '关联商品ID列表，JSON格式',
+    sort INT NOT NULL DEFAULT 0 COMMENT '排序号',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '流程步骤表';
 

@@ -6,11 +6,12 @@ import com.funeral.dto.ProductDTO;
 import com.funeral.entity.Product;
 import com.funeral.mapper.ProductMapper;
 import com.funeral.service.ProductService;
+import com.funeral.vo.ProductVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -47,15 +48,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> listProducts(Integer page, Integer size, String category) {
-        Page<Product> pageParam = new Page<>(page, size);
-        LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.hasText(category)) {
-            wrapper.eq(Product::getCategoryId, category);
+    public Page<Product> listProducts(Integer page, Integer size, Long categoryId) {
+        Page<Product> pageInfo = new Page<>(page, size);
+        LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        
+        if (categoryId != null) {
+            queryWrapper.eq(Product::getCategoryId, categoryId);
         }
-        wrapper.eq(Product::getStatus, 1);
-        wrapper.orderByDesc(Product::getCreatedTime);
-        return productMapper.selectPage(pageParam, wrapper);
+        
+        queryWrapper.orderByDesc(Product::getCreatedTime);
+        return productMapper.selectPage(pageInfo, queryWrapper);
     }
 
     @Override
@@ -68,5 +70,23 @@ public class ProductServiceImpl implements ProductService {
                    .orderByDesc(Product::getCreatedTime)
                    .last("LIMIT 10");
         return productMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public Product getById(Long id) {
+        return productMapper.selectById(id);
+    }
+
+    @Override
+    public List<ProductVO> getProductsByIds(List<Long> productIds) {
+        LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Product::getId, productIds);
+        List<Product> products = productMapper.selectList(queryWrapper);
+
+        return products.stream().map(product -> {
+            ProductVO vo = new ProductVO();
+            BeanUtils.copyProperties(product, vo);
+            return vo;
+        }).collect(Collectors.toList());
     }
 }

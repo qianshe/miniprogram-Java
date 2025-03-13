@@ -10,10 +10,19 @@ public class User {
     @TableId(type = IdType.AUTO)
     private Long id;
     
+    private String unionid;
+    
     private String openid;
+    
     private String nickname;
+    
     private String avatarUrl;
+    
     private String phone;
+
+    private String password;
+    
+    private Integer role;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;
