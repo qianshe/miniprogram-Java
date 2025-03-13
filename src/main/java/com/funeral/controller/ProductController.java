@@ -53,7 +53,7 @@ public class ProductController {
     public Result<Page<Product>> listProducts(
             @ApiParam("页码") @RequestParam(defaultValue = "1") Integer page,
             @ApiParam("每页数量") @RequestParam(defaultValue = "10") Integer size,
-            @ApiParam("商品类别") @RequestParam(required = false) String category) {
+            @ApiParam("商品类别") @RequestParam(required = false) Long category) {
         return Result.success(productService.listProducts(page, size, category));
     }
 } 

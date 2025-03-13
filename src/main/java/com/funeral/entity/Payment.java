@@ -2,25 +2,22 @@ package com.funeral.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("user")
-public class User {
+@TableName("payment")
+public class Payment {
     @TableId(type = IdType.AUTO)
     private Long id;
     
-    private String unionid;
+    private String orderNo;
     
-    private String openid;
+    private String transactionId;
     
-    private String nickname;
+    private BigDecimal amount;
     
-    private String avatarUrl;
-    
-    private String phone;
-    
-    private Integer role;
+    private Integer status;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;

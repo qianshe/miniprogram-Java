@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.funeral.vo.OrderListVO;
 import com.funeral.vo.OrderDetailVO;
+import com.funeral.util.QrCodeUtil;
+import com.funeral.service.CacheService;
+import com.funeral.mapper.ProcessStepMapper;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -42,6 +45,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private ProductMapper productMapper;
+
+    @Resource
+    private QrCodeUtil qrCodeUtil;
+
+    @Resource
+    private CacheService cacheService;
+
+    @Resource
+    private ProcessStepMapper processStepMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -263,4 +275,60 @@ public class OrderServiceImpl implements OrderService {
         return vo;
     }
 
-} 
+    @Override
+    public String generateOrderQrCode(String orderNo) {
+        Orders order = getOrder(orderNo);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        
+        // 生成二维码内容（包含订单号和时间戳）
+        String content = orderNo + "_" + System.currentTimeMillis();
+        
+        // 生成二维码图片
+        String qrCodeUrl = qrCodeUtil.generateQrCode(content, 300, 300);
+        
+        // 更新订单的二维码URL
+        order.setQrCodeUrl(qrCodeUrl);
+        orderMapper.updateById(order);
+        
+        // 将二维码信息存入缓存，设置24小时过期
+        String cacheKey = "qrcode:" + orderNo;
+        cacheService.set(cacheKey, qrCodeUrl);
+        
+        return qrCodeUrl;
+    }
+
+    @Override
+    public void bindOrderByQrCode(String orderNo, Long userId) {
+        Orders order = getOrder(orderNo);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        
+        // 检查订单是否已经绑定
+        if (order.getUserId() != null) {
+            throw new RuntimeException("订单已被绑定");
+        }
+        
+        // 检查订单是否已过期（假设订单有效期为24小时）
+        if (order.getCreatedTime().plusHours(24).isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("订单已过期");
+        }
+        
+        // 从缓存中获取二维码信息进行验证
+        String cacheKey = "qrcode:" + orderNo;
+        String cachedQrCode = (String) cacheService.get(cacheKey);
+        if (cachedQrCode == null) {
+            throw new RuntimeException("二维码已失效");
+        }
+        
+        // 绑定用户
+        order.setUserId(userId);
+        orderMapper.updateById(order);
+        
+        // 删除缓存中的二维码信息
+        cacheService.delete(cacheKey);
+    }
+
+}
