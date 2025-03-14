@@ -2,10 +2,7 @@ package com.funeral.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.funeral.common.Result;
-import com.funeral.dto.CategoryDTO;
-import com.funeral.dto.OrderDTO;
-import com.funeral.dto.ProductDTO;
-import com.funeral.dto.StockUpdateDTO;
+import com.funeral.dto.*;
 import com.funeral.entity.Product;
 import com.funeral.service.CategoryService;
 import com.funeral.service.ProductService;
@@ -17,6 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.BeanUtils;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Api(tags = "管理员接口")
 @RestController
@@ -85,23 +85,20 @@ public class AdminController {
         return Result.success(orderNo);
     }
 
-    public ProductDTO getProduct(Long id) {
-        Product product = productService.getById(id);
-        if (product == null) {
-            return null;
-        }
-        ProductDTO productDTO = new ProductDTO();
-        BeanUtils.copyProperties(product, productDTO);
-        return productDTO;
+    @ApiOperation("获取订单统计信息")
+    @GetMapping("/statistics")
+    public Result<OrderStatisticsDTO> getOrderStatistics(
+            @ApiParam("开始时间") @RequestParam(required = false) LocalDateTime startTime,
+            @ApiParam("结束时间") @RequestParam(required = false) LocalDateTime endTime) {
+        return Result.success(orderService.getOrderStatistics(startTime, endTime));
     }
 
-    public Page<Product> listProducts(Integer page, Integer size, Long categoryId) {
-        return productService.listProducts(page, size, categoryId);
-    }
-
-    @PostMapping("/orders")
-    public Result<String> createOrder(@RequestBody OrderDTO orderDTO) {
-        // 使用orderDTO.getUserId()获取用户ID
-        return Result.success(orderService.createOrder(orderDTO.getUserId(), orderDTO));
+    @ApiOperation("导出订单数据")
+    @GetMapping("/export")
+    public void exportOrders(
+            @ApiParam("开始时间") @RequestParam(required = false) LocalDateTime startTime,
+            @ApiParam("结束时间") @RequestParam(required = false) LocalDateTime endTime,
+            HttpServletResponse response) throws IOException {
+        orderService.exportOrders(startTime, endTime, response);
     }
 }

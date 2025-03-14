@@ -37,10 +37,6 @@ public class Orders {
     private LocalDateTime serviceTime;
     private Integer deliveryType;
     
-    private Integer deliveryType; // 配送方式：0-自提，1-配送
-    
-    private String qrCodeUrl; // 二维码URL
-    
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;
     

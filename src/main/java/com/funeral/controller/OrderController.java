@@ -63,21 +63,4 @@ public class OrderController {
             @ApiParam("订单状态") @RequestParam(required = false) Long orderStatus) {
         return Result.success(orderService.listUserOrders(userId, orderStatus, page, size));
     }
-
-    @ApiOperation("获取订单统计信息")
-    @GetMapping("/statistics")
-    public Result<OrderStatisticsDTO> getOrderStatistics(
-            @ApiParam("开始时间") @RequestParam(required = false) LocalDateTime startTime,
-            @ApiParam("结束时间") @RequestParam(required = false) LocalDateTime endTime) {
-        return Result.success(orderService.getOrderStatistics(startTime, endTime));
-    }
-
-    @ApiOperation("导出订单数据")
-    @GetMapping("/export")
-    public void exportOrders(
-            @ApiParam("开始时间") @RequestParam(required = false) LocalDateTime startTime,
-            @ApiParam("结束时间") @RequestParam(required = false) LocalDateTime endTime,
-            HttpServletResponse response) throws IOException {
-        orderService.exportOrders(startTime, endTime, response);
-    }
 }
