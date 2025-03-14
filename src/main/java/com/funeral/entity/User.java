@@ -24,6 +24,8 @@ public class User {
     
     private Integer role;
     
+    private Integer role;
+    
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;
     
