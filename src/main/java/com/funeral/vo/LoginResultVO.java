@@ -15,4 +15,8 @@ public class LoginResultVO {
     
     @ApiModelProperty("JWT令牌")
     private String token;
-} 
+
+    @ApiModelProperty("微信openid")
+    private String openid;
+
+}
