@@ -10,4 +10,6 @@ public interface CategoryService {
     void deleteCategory(Long id);
     Category getCategory(Long id);
     List<Category> listCategories();
-} 
+
+    List<Category> listCategoriesByType(Integer type);
+}

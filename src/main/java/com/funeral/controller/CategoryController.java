@@ -19,29 +19,6 @@ public class CategoryController {
     @Resource
     private CategoryService categoryService;
 
-    @ApiOperation("新增分类")
-    @PostMapping
-    public Result<Void> saveCategory(@RequestBody CategoryDTO categoryDTO) {
-        categoryService.saveCategory(categoryDTO);
-        return Result.success();
-    }
-
-    @ApiOperation("修改分类")
-    @PutMapping("/{id}")
-    public Result<Void> updateCategory(
-            @ApiParam("分类ID") @PathVariable Long id,
-            @RequestBody CategoryDTO categoryDTO) {
-        categoryService.updateCategory(id, categoryDTO);
-        return Result.success();
-    }
-
-    @ApiOperation("删除分类")
-    @DeleteMapping("/{id}")
-    public Result<Void> deleteCategory(@ApiParam("分类ID") @PathVariable Long id) {
-        categoryService.deleteCategory(id);
-        return Result.success();
-    }
-
     @ApiOperation("获取分类详情")
     @GetMapping("/{id}")
     public Result<Category> getCategory(@ApiParam("分类ID") @PathVariable Long id) {

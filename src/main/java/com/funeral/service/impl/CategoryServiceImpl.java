@@ -49,4 +49,11 @@ public class CategoryServiceImpl implements CategoryService {
         wrapper.orderByAsc(Category::getSort);
         return categoryMapper.selectList(wrapper);
     }
+
+    @Override
+    public List<Category> listCategoriesByType(Integer type) {
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Category::getType, type);
+        return categoryMapper.selectList(wrapper);
+    }
 } 

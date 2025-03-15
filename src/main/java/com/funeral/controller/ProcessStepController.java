@@ -2,6 +2,7 @@ package com.funeral.controller;
 
 import com.funeral.common.Result;
 import com.funeral.service.ProcessStepService;
+import com.funeral.vo.ProcessStepDetailVO;
 import com.funeral.vo.ProcessStepVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,5 +24,13 @@ public class ProcessStepController {
     public Result<List<ProcessStepVO>> getProcessSteps(
             @ApiParam("流程类型：0-白事，1-红事") @RequestParam Integer type) {
         return Result.success(processStepService.getProcessSteps(type));
+    }
+
+    @ApiOperation("获取流程步骤详细信息")
+    @GetMapping("/step-details/{stepId}")
+    public Result<ProcessStepDetailVO> getStepDetails(
+            @ApiParam("步骤ID") @PathVariable Integer stepId,
+            @ApiParam("流程类型：0-白事，1-红事") @RequestParam Integer type ) {
+        return Result.success(processStepService.getStepDetails(stepId, type));
     }
 } 

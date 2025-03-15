@@ -3,21 +3,28 @@ package com.funeral.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.funeral.dto.ProductDTO;
+import com.funeral.entity.Category;
 import com.funeral.entity.Product;
 import com.funeral.mapper.ProductMapper;
+import com.funeral.service.CategoryService;
 import com.funeral.service.ProductService;
 import com.funeral.vo.ProductVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
     
     @Resource
     private ProductMapper productMapper;
+    @Resource
+    private CategoryService categoryService;
 
     @Override
     public void saveProduct(ProductDTO productDTO) {
@@ -61,13 +68,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getRecommendedProducts() {
+    public List<Product> getRecommendedProducts(Integer type) {
         // 这里可以根据具体业务逻辑来实现推荐算法
         // 示例实现：获取置顶的商品作为推荐商品
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        List<Long> categoriesIds = categoryService.listCategoriesByType(type)
+                .stream().map(Category::getId)
+                .collect(Collectors.toList());
         queryWrapper
                 // .eq(Product::getIsRecommended, true)
-                   .orderByDesc(Product::getCreatedTime)
+                .in(Product::getCategoryId, categoriesIds).orderByDesc(Product::getCreatedTime)
                    .last("LIMIT 10");
         return productMapper.selectList(queryWrapper);
     }

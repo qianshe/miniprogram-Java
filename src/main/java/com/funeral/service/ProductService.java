@@ -19,7 +19,7 @@ public interface ProductService {
      * 获取推荐商品列表
      * @return 推荐商品列表
      */
-    List<Product> getRecommendedProducts();
+    List<Product> getRecommendedProducts(Integer type);
 
     Product getById(Long id);
 

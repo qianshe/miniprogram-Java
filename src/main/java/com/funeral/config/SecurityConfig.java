@@ -27,8 +27,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // 允许访问的公共接口
             .antMatchers("/api/index/**").permitAll()
             .antMatchers("/api/products/**").permitAll()
-            .antMatchers("/api/process/**").permitAll()
-            .antMatchers("/api/category/**").permitAll()
             .antMatchers("/api/categories/**").permitAll()
             .antMatchers("/api/auth/**").permitAll()
             // Swagger和Knife4j相关资源
@@ -42,6 +40,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // 静态资源
             .antMatchers("/static/**").permitAll()
             .antMatchers("/upload/**").permitAll()
+            // 管理员接口
+            .antMatchers("/api/admin/**").hasRole("ADMIN")
+            // 用户接口
+            .antMatchers("/api/cart/**").hasRole("USER")
+            .antMatchers("/api/orders/**").hasRole("USER")
             // 其他接口需要认证
             .anyRequest().authenticated();
 
