@@ -3,7 +3,7 @@ package com.funeral.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,6 +25,12 @@ public class OrderDTO {
     @ApiModelProperty("备注")
     private String remark;
     
+    @ApiModelProperty("配送方式：0-自提，1-配送")
+    private Integer deliveryType;
+    
     @ApiModelProperty("订单商品列表")
     private List<OrderItemDTO> items;
-} 
+
+    @ApiModelProperty("用户ID")
+    private Long userId;
+}

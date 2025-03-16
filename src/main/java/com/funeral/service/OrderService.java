@@ -19,4 +19,8 @@ public interface OrderService {
     OrderStatisticsDTO getOrderStatistics(LocalDateTime startTime, LocalDateTime endTime);
     void exportOrders(LocalDateTime startTime, LocalDateTime endTime, HttpServletResponse response) throws IOException;
     OrderDetailVO getOrderDetail(String orderNo);
+    
+    // 新增扫码绑定相关方法
+    String generateOrderQrCode(String orderNo);
+    void bindOrderByQrCode(String qrCode, Long userId);
 } 
