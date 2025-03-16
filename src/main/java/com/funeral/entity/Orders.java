@@ -35,7 +35,6 @@ public class Orders {
     
     private String address;
     private LocalDateTime serviceTime;
-    private Integer deliveryType;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;
