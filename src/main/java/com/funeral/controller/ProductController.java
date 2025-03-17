@@ -38,6 +38,17 @@ public class ProductController {
             @ApiParam("商品类别") @RequestParam(required = false) Long category) {
         return Result.success(productService.listProducts(page, size, category));
     }
+
+    /**
+     * 获取推荐商品列表
+     */
+    @ApiOperation("获取推荐商品列表")
+    @GetMapping("/recommend")
+    public Result<List<Product>> listRecommendedProducts(
+            @ApiParam("商品类型：0-白事，1-红事") @RequestParam Integer type
+    ) {
+        return Result.success(productService.getRecommendedProducts(type));
+    }
     
     @ApiOperation("获取所有分类")
     @GetMapping("/categories")

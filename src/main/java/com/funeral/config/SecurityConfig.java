@@ -2,6 +2,7 @@ package com.funeral.config;
 
 import com.funeral.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -12,6 +13,7 @@ import javax.annotation.Resource;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true) // 启用方法级安全,允许使用@PreAuthorize等注解
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Resource
@@ -25,7 +27,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 允许访问的公共接口
-                .antMatchers("/api/index/**").permitAll()
                 .antMatchers("/api/products/**").permitAll()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/process/**").permitAll()
@@ -41,10 +42,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/static/**").permitAll()
                 .antMatchers("/upload/**").permitAll()
                 // 管理员接口
-                .antMatchers("/api/admin/**").hasRole("ADMIN")
-                // 用户接口
-                .antMatchers("/api/cart/**").hasRole("USER")
-                .antMatchers("/api/orders/**").hasRole("USER")
+                // .antMatchers("/api/admin/**").hasRole("ADMIN")
+                // // 用户接口
+                // .antMatchers("/api/cart/**").hasRole("USER")
+                // .antMatchers("/api/orders/**").hasRole("USER")
                 // 其他接口需要认证
                 .anyRequest().authenticated();
 

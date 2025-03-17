@@ -2,6 +2,7 @@ package com.funeral.common.exception;
 
 import com.funeral.common.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -27,6 +28,11 @@ public class GlobalExceptionHandler {
     public Result<Void> handleBusinessException(BusinessException e) {
         log.error("业务异常：{}", e.getMessage(), e);
         return Result.error(e.getCode(), e.getMessage());
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public Result<Void> handleAccessDeniedException(AccessDeniedException e) {
+        log.error("权限不足：{}", e.getMessage(), e);
+        return Result.error(403, "权限不足");
     }
 
     /**

@@ -37,7 +37,7 @@ wx:
 
 # JWT配置
 jwt:
-  secret: your_jwt_secret_key_must_be_at_least_32_bytes_long
+  secret: "4b5e6f7a8c9d0e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u7v8w9x0y1z2a3b4c5d"
   expiration: 86400  # 24小时，单位秒
 
 # Security配置

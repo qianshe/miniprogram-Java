@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 创建认证对象
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userId, null, authorities);
-            
+            request.setAttribute("userId", userId);
             // 设置认证信息
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

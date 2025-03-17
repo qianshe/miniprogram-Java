@@ -75,6 +75,9 @@ public class ProductServiceImpl implements ProductService {
         List<Long> categoriesIds = categoryService.listCategoriesByType(type)
                 .stream().map(Category::getId)
                 .collect(Collectors.toList());
+        if (categoriesIds.isEmpty()) {
+            return new ArrayList<>();
+        }
         queryWrapper
                 // .eq(Product::getIsRecommended, true)
                 .in(Product::getCategoryId, categoriesIds).orderByDesc(Product::getCreatedTime)

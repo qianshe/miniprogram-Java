@@ -47,7 +47,7 @@ public class WxAuthServiceImpl implements WxAuthService {
         // 调用微信接口获取openid
         String url = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid +
                 "&secret=" + secret + "&js_code=" + loginDTO.getCode() + "&grant_type=authorization_code";
-        log.info("请求微信接口获取openid: {}", url);
+        
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         JSONObject json = JSON.parseObject(response.getBody());
         
@@ -72,14 +72,13 @@ public class WxAuthServiceImpl implements WxAuthService {
         }
         
         // 生成JWT令牌
-        String token = jwtUtil.generateToken(user.getId(), user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getRole(), openid);
         
         // 返回登录结果
         LoginResultVO result = new LoginResultVO();
         result.setUserId(user.getId());
         result.setRole(user.getRole());
         result.setToken(token);
-        result.setOpenid(openid);
         return result;
     }
 
@@ -112,7 +111,7 @@ public class WxAuthServiceImpl implements WxAuthService {
         }
         
         // 生成JWT令牌
-        String token = jwtUtil.generateToken(user.getId(), user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getRole(), null);
         
         // 返回登录结果
         LoginResultVO result = new LoginResultVO();
