@@ -276,10 +276,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String generateOrderQrCode(String orderNo) {
-        Orders order = getOrder(orderNo);
-        if (order == null) {
-            throw new RuntimeException("订单不存在");
-        }
+        // Orders order = getOrder(orderNo);
+        // if (order == null) {
+        //     throw new RuntimeException("订单不存在");
+        // }
         
         // 生成二维码内容（包含订单号和时间戳）
         String content = orderNo + "_" + System.currentTimeMillis();
@@ -289,11 +289,11 @@ public class OrderServiceImpl implements OrderService {
         
         // 更新订单的二维码URL
         // order.setQrCodeUrl(qrCodeUrl);
-        orderMapper.updateById(order);
+        // orderMapper.updateById(order);
         
         // 将二维码信息存入缓存，设置24小时过期
-        String cacheKey = "qrcode:" + orderNo;
-        cacheService.set(cacheKey, qrCodeUrl);
+        // String cacheKey = "qrcode:" + orderNo;
+        // cacheService.set(cacheKey, qrCodeUrl);
         
         return qrCodeUrl;
     }

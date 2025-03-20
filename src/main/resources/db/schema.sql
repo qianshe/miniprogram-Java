@@ -131,3 +131,19 @@ CREATE TABLE process_step (
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '流程步骤表';
 
+
+CREATE TABLE `cart_item` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `product_id` bigint(20) NOT NULL COMMENT '商品ID',
+  `product_name` varchar(100) NOT NULL COMMENT '商品名称',
+  `product_image` varchar(255) DEFAULT NULL COMMENT '商品图片',
+  `price` decimal(10,2) NOT NULL COMMENT '单价',
+  `quantity` int(11) NOT NULL COMMENT '数量',
+  `total_price` decimal(10,2) NOT NULL COMMENT '总价',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `update_time` datetime NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='购物车项表';

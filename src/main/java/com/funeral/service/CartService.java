@@ -1,11 +1,9 @@
 package com.funeral.service;
 
 import com.funeral.dto.CartDTO;
-import com.funeral.entity.Product;
 import com.funeral.vo.CartItemVO;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CartService {
     /**
