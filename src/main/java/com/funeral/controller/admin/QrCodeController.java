@@ -119,11 +119,11 @@ public class QrCodeController {
         // 获取扫码状态
         String status = stringRedisTemplate.opsForValue().get(SCAN_KEY_PREFIX + scene);
         if (status == null) {
-            return Result.fail("二维码已过期");
+            return Result.error("二维码已过期");
         }
         
         if ("WAITING".equals(status)) {
-            return Result.fail("等待扫码");
+            return Result.error("等待扫码");
         }
         
         // 获取用户信息
@@ -136,7 +136,7 @@ public class QrCodeController {
             return Result.success(userAuth);
         }
         
-        return Result.fail("获取用户信息失败");
+        return Result.error("获取用户信息失败");
     }
 
     private String sendPostRequest(String url, String params) throws IOException {
