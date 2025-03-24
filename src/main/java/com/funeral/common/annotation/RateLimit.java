@@ -1,4 +1,4 @@
-package com.funeral.annotation;
+package com.funeral.common.annotation;
 
 import java.lang.annotation.*;
 

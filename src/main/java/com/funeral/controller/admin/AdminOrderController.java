@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Api(tags = "管理员-订单管理接口")
 @RestController
 @RequestMapping("/api/admin/orders")
-// @PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminOrderController {
     
     @Resource

@@ -11,7 +11,7 @@ import com.funeral.service.SmsService;
 import com.funeral.service.WxAuthService;
 import com.funeral.util.JwtUtil;
 import com.funeral.vo.LoginResultVO;
-import com.funeral.annotation.RateLimit;
+import com.funeral.common.annotation.RateLimit;
 import com.funeral.util.AESUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import lombok.extern.slf4j.Slf4j;

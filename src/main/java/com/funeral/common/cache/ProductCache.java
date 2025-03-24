@@ -1,4 +1,4 @@
-package com.funeral.cache;
+package com.funeral.common.cache;
 
 import com.funeral.entity.Product;
 import java.util.Optional;

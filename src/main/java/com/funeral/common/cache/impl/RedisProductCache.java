@@ -1,7 +1,7 @@
-package com.funeral.cache.impl;
+package com.funeral.common.cache.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.funeral.cache.ProductCache;
+import com.funeral.common.cache.ProductCache;
 import com.funeral.entity.Product;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;

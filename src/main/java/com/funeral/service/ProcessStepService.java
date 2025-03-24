@@ -52,18 +52,4 @@ public interface ProcessStepService {
      * @return 是否成功
      */
     Boolean adjustStepSort(Long stepId, Integer sort);
-    
-    void createStep(ProcessStep step);
-    
-    void updateStep(ProcessStep step);
-    
-    void deleteStep(Long id);
-    
-    ProcessStepVO getStepDetail(Long id);
-    
-    Page<ProcessStepVO> listSteps(Integer type, Integer page, Integer size);
-    
-    List<ProcessStepVO> getStepsByType(Integer type);
-    
-    void updateStepOrder(List<Long> stepIds);
 }

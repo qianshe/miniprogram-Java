@@ -1,6 +1,6 @@
 package com.funeral.service.impl;
 
-import com.funeral.cache.CartCache;
+import com.funeral.common.cache.CartCache;
 import com.funeral.dto.CartDTO;
 import com.funeral.entity.CartItem;
 import com.funeral.entity.Product;

@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/products/**").permitAll()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/process/**").permitAll()
-                .antMatchers("/api/admin/orders/**").permitAll()
+                // .antMatchers("/api/admin/orders/**").permitAll()
 
                 // Swagger和Knife4j相关资源
                 .antMatchers("/doc.html").permitAll()

@@ -31,8 +31,8 @@ public class ProcessStep {
     private String productIds;
 
     @ApiModelProperty(value = "排序号", example = "1")
-    @TableField("sort_order")
-    private Integer sortOrder;
+    @TableField("sort")
+    private Integer sort;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;

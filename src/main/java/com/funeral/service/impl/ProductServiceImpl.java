@@ -3,7 +3,7 @@ package com.funeral.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.funeral.cache.ProductCache;
+import com.funeral.common.cache.ProductCache;
 import com.funeral.dto.ProductDTO;
 import com.funeral.entity.Category;
 import com.funeral.entity.Product;
@@ -37,12 +37,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public void saveProduct(ProductDTO productDTO) {
         Product product = new Product();
         BeanUtils.copyProperties(productDTO, product);
-        product.setStatus(1); // 默认上架
+        product.setIsEnabled(true); // 默认上架
         productMapper.insert(product);
     }
 
-    @Override
     @Transactional
+    @Override
     public boolean saveProduct(Product product) {
         boolean success = save(product);
         if (success) {
@@ -61,8 +61,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         productMapper.updateById(product);
     }
 
-    @Override
     @Transactional
+    @Override
     public boolean updateStock(Long id, Integer delta) {
         Product product = getById(id);
         if (product == null || product.getStock() + delta < 0) {
@@ -98,10 +98,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
         
         if (categoryId != null) {
-            queryWrapper.eq(Product::getCategoryId, categoryId);
+            queryWrapper.eq(Product::getCategory, categoryId);
         }
         
-        queryWrapper.orderByDesc(Product::getCreatedTime);
+        queryWrapper.orderByDesc(Product::getCreateTime);
         return productMapper.selectPage(pageInfo, queryWrapper);
     }
 
@@ -124,7 +124,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         }
         queryWrapper
                 // .eq(Product::getIsRecommended, true)
-                .in(Product::getCategoryId, categoriesIds).orderByDesc(Product::getCreatedTime)
+                .in(Product::getCategory, categoriesIds).orderByDesc(Product::getCreateTime)
                    .last("LIMIT 10");
         return productMapper.selectList(queryWrapper);
     }

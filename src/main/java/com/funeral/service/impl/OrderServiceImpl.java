@@ -34,10 +34,7 @@ import com.funeral.util.QrCodeUtil;
 import com.funeral.service.CacheService;
 import com.funeral.mapper.ProcessStepMapper;
 import com.funeral.enums.OrderStatusEnum;
-import com.funeral.entity.Order;
-import com.funeral.event.OrderStatusChangeEvent;
 import com.funeral.service.ProcessStepService;
-import com.funeral.vo.OrderStatisticsVO;
 import org.springframework.context.ApplicationEventPublisher;
 
 @Service
@@ -108,16 +105,7 @@ public class OrderServiceImpl implements OrderService {
         order.setContactName(orderDTO.getContactName());
         order.setContactPhone(orderDTO.getContactPhone());
         order.setAddress(orderDTO.getAddress());
-        order.setServiceTime(orderDTO.getServiceTime());
         orderMapper.insert(order);
-
-        // 关联流程步骤
-        if (orderDTO.getProcessStepId() != null) {
-            order.setProcessStepId(orderDTO.getProcessStepId());
-            order.setProcessInfo(JSON.toJSONString(
-                processStepService.getStepDetail(orderDTO.getProcessStepId())
-            ));
-        }
         
         // 设置配送方式
         order.setDeliveryType(orderDTO.getDeliveryType());
@@ -125,6 +113,7 @@ public class OrderServiceImpl implements OrderService {
             order.setAddress(orderDTO.getAddress());
             order.setContactPhone(orderDTO.getContactPhone());
             order.setContactName(orderDTO.getContactName());
+            order.setDeliveryTime(orderDTO.getServiceTime());
         }
 
         return orderNo;
@@ -204,7 +193,7 @@ public class OrderServiceImpl implements OrderService {
         statistics.setTotalOrders(orders.size());
         statistics.setPendingPaymentOrders((int) orders.stream().filter(o -> o.getStatus() == 0).count());
         statistics.setPaidOrders((int) orders.stream().filter(o -> o.getStatus() == 1).count());
-        statistics.setCancelledOrders((int) orders.stream()..filter(o -> o.getStatus() == 2).count());
+        statistics.setCancelledOrders((int) orders.stream().filter(o -> o.getStatus() == 2).count());
         statistics.setTotalIncome(orders.stream()
                 .filter(o -> o.getStatus() == 1)
                 .map(Orders::getTotalAmount)
@@ -358,55 +347,30 @@ public class OrderServiceImpl implements OrderService {
         cacheService.delete(cacheKey);
     }
 
-    @Override
     @Transactional
+    @Override
     public boolean updateOrderStatus(String orderNo, Integer targetStatus) {
-        Order order = getByOrderNo(orderNo);
-        if (order == null) {
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Orders::getOrderNo, orderNo);
+        Orders orders = orderMapper.selectOne(wrapper);
+        if (orders == null) {
             return false;
         }
 
         // 检查状态转换是否合法
-        if (!OrderStatusEnum.canTransit(order.getStatus(), targetStatus)) {
+        if (!OrderStatusEnum.canTransit(orders.getStatus(), targetStatus)) {
             return false;
         }
 
         // 更新订单状态
-        order.setStatus(targetStatus);
-        boolean success = updateById(order);
+        orders.setStatus(targetStatus);
+        boolean success = orderMapper.updateById(orders) > 0;
         
         // 发布状态变更事件
-        if (success) {
-            eventPublisher.publishEvent(new OrderStatusChangeEvent(order));
-        }
+        // if (success) {
+        //     eventPublisher.publishEvent(new OrderStatusChangeEvent(orders));
+        // }
         
         return success;
-    }
-
-    @Override
-    public OrderStatisticsVO getOrderStatistics(LocalDateTime startTime, LocalDateTime endTime) {
-        OrderStatisticsVO statistics = new OrderStatisticsVO();
-        
-        // 统计各状态订单数量
-        for (OrderStatusEnum status : OrderStatusEnum.values()) {
-            Integer count = lambdaQuery()
-                .eq(Order::getStatus, status.getCode())
-                .between(Order::getCreateTime, startTime, endTime)
-                .count();
-            statistics.getStatusCounts().put(status.getCode(), count);
-        }
-        
-        // 统计总金额
-        statistics.setTotalAmount(
-            lambdaQuery()
-                .between(Order::getCreateTime, startTime, endTime)
-                .eq(Order::getStatus, OrderStatusEnum.COMPLETED.getCode())
-                .list()
-                .stream()
-                .map(Order::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-        );
-        
-        return statistics;
     }
 }

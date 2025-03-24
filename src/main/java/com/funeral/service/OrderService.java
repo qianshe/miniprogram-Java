@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import com.funeral.vo.OrderListVO;
 import com.funeral.vo.OrderDetailVO;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface OrderService {
     String createOrder(Long userId, OrderDTO orderDTO);
@@ -23,4 +24,7 @@ public interface OrderService {
     // 新增扫码绑定相关方法
     String generateOrderQrCode(String orderNo);
     void bindOrderByQrCode(String qrCode, Long userId);
-} 
+
+    @Transactional
+    boolean updateOrderStatus(String orderNo, Integer targetStatus);
+}

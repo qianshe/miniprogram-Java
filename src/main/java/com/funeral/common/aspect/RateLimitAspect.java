@@ -1,6 +1,6 @@
-package com.funeral.aspect;
+package com.funeral.common.aspect;
 
-import com.funeral.annotation.RateLimit;
+import com.funeral.common.annotation.RateLimit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,7 +22,7 @@ public class RateLimitAspect {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     
-    @Around("@annotation(com.funeral.annotation.RateLimit)")
+    @Around("@annotation(com.funeral.common.annotation.RateLimit)")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String ip = request.getRemoteAddr();
