@@ -1,12 +1,14 @@
 package com.funeral.config;
 
 import com.funeral.filter.JwtAuthenticationFilter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.annotation.Resource;
@@ -30,6 +32,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/products/**").permitAll()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/process/**").permitAll()
+                .antMatchers("/api/admin/orders/**").permitAll()
+
                 // Swagger和Knife4j相关资源
                 .antMatchers("/doc.html").permitAll()
                 .antMatchers("/swagger-resources/**").permitAll()
@@ -52,4 +56,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 添加JWT过滤器
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
-} 
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}

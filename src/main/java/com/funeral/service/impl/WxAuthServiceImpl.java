@@ -11,6 +11,9 @@ import com.funeral.service.SmsService;
 import com.funeral.service.WxAuthService;
 import com.funeral.util.JwtUtil;
 import com.funeral.vo.LoginResultVO;
+import com.funeral.annotation.RateLimit;
+import com.funeral.util.AESUtil;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,12 @@ public class WxAuthServiceImpl implements WxAuthService {
     
     @Resource
     private SmsService smsService;
+    
+    @Resource
+    private AESUtil aesUtil;
+    
+    @Resource
+    private BCryptPasswordEncoder passwordEncoder;
     
     @Override
     public LoginResultVO login(WxLoginDTO loginDTO) {
@@ -81,6 +90,7 @@ public class WxAuthServiceImpl implements WxAuthService {
         return result;
     }
 
+    @RateLimit(time = 60, count = 5)
     @Override
     public LoginResultVO phoneLogin(PhoneLoginDTO phoneLoginDTO) {
         // 验证验证码
@@ -103,8 +113,10 @@ public class WxAuthServiceImpl implements WxAuthService {
         // 用户不存在则注册新用户
         if (user == null) {
             user = new User();
-            user.setPhone(phoneLoginDTO.getPhone());
-            user.setPassword(phoneLoginDTO.getPassword());
+            user.setPhone(aesUtil.encrypt(phoneLoginDTO.getPhone()));
+            if (phoneLoginDTO.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(phoneLoginDTO.getPassword()));
+            }
             user.setRole(0); // 设置为普通用户
             userMapper.insert(user);
         }

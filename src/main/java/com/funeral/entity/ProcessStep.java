@@ -15,19 +15,24 @@ public class ProcessStep {
     private Long id;
 
     @ApiModelProperty(value = "步骤名称", example = "遗体接运", required = true)
+    @TableField("step_name")
     private String stepName;
 
     @ApiModelProperty(value = "步骤描述", example = "专业人员上门接运遗体")
+    @TableField("description")
     private String description;
 
     @ApiModelProperty(value = "流程类型：0-白事 1-红事", example = "0", required = true)
+    @TableField("type")
     private Integer type;
 
     @ApiModelProperty(value = "关联商品ID列表", example = "[1,2,3]")
+    @TableField("product_ids")
     private String productIds;
 
     @ApiModelProperty(value = "排序号", example = "1")
-    private Integer sort;
+    @TableField("sort_order")
+    private Integer sortOrder;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;
