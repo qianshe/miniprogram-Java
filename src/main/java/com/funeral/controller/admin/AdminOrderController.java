@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -104,15 +103,16 @@ public class AdminOrderController {
 
     @ApiOperation("获取小程序二维码")
     @GetMapping("/api/wechat/qrcode")
-    public Map<String, Object> getQRCode() throws IOException {
+    public Map<String, Object> getQRCode(@ApiParam("订单号") @RequestParam String orderNo) throws IOException {
         String accessToken = getAccessToken();
         String url = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=" + accessToken;
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
 
         JSONObject postData = new JSONObject();
-        postData.put("scene", "test_scene");
-        // postData.put("page", "pages/index/index");
+        postData.put("scene", "scanResult");
+        postData.put("orderNo", orderNo);
+        postData.put("page", "pages/scan-result/scan-result");
         StringEntity entity = new StringEntity(postData.toJSONString(), "UTF-8");
         httpPost.setEntity(entity);
         httpPost.setHeader("Content-type", "application/json");
