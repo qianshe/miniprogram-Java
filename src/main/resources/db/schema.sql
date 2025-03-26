@@ -26,6 +26,9 @@ CREATE TABLE user_role (
 -- 用户表
 CREATE TABLE user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    username VARCHAR(50) UNIQUE COMMENT '用户名',
+    password VARCHAR(100) COMMENT '加密后的密码',
+    role TINYINT(1) DEFAULT 0 COMMENT '角色：0-普通用户 1-管理员',
     unionid VARCHAR(64) COMMENT '微信unionId',
     openid VARCHAR(64) NOT NULL COMMENT '微信openid',
     nickname VARCHAR(32) COMMENT '用户昵称',
@@ -52,7 +55,8 @@ CREATE TABLE product (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     category_id BIGINT NOT NULL COMMENT '分类ID',
     name VARCHAR(64) NOT NULL COMMENT '商品名称',
-    description TEXT COMMENT '商品描述',
+    category TINYINT(1) DEFAULT 0 COMMENT '分类：0-白事 1-红事',
+    description TEXT COMMENT '商品富文本描述',
     price DECIMAL(10,2) NOT NULL COMMENT '商品价格',
     image_url VARCHAR(255) COMMENT '商品图片URL',
     stock INT NOT NULL DEFAULT 0 COMMENT '库存数量',

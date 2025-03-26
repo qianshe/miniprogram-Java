@@ -15,6 +15,10 @@ public class Product {
     @ApiModelProperty(value = "商品ID", example = "1")
     private Long id;
     
+    @TableField("category_id")
+    @ApiModelProperty(value = "分类ID", example = "1")
+    private Long categoryId;
+    
     @TableField("name")
     @ApiModelProperty(value = "商品名称", example = "寿衣", required = true)
     private String name;
