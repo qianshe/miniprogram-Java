@@ -9,12 +9,14 @@ import com.funeral.vo.OrderListVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
 @Api(tags = "用户订单接口")
 @RestController
 @RequestMapping("/api/orders")
+@PreAuthorize("hasRole('USER')")
 public class OrderController {
     
     @Resource
@@ -23,7 +25,7 @@ public class OrderController {
     @ApiOperation("创建订单")
     @PostMapping
     public Result<String> createOrder(
-            @ApiParam("用户ID") @RequestParam Long userId,
+            @ApiParam("用户ID") @RequestAttribute Long userId,
             @RequestBody OrderDTO orderDTO) {
         String orderNo = orderService.createOrder(userId, orderDTO);
         return Result.success(orderNo);

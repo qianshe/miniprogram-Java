@@ -31,13 +31,13 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 # 微信小程序配置
+
 wx:
   appid: your_appid
   secret: your_secret
-
 # JWT配置
 jwt:
-  secret: your_jwt_secret_key_must_be_at_least_32_bytes_long
+  secret: your_secret_key
   expiration: 86400  # 24小时，单位秒
 
 # Security配置

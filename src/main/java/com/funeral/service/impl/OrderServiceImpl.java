@@ -33,6 +33,9 @@ import com.funeral.vo.OrderDetailVO;
 import com.funeral.util.QrCodeUtil;
 import com.funeral.service.CacheService;
 import com.funeral.mapper.ProcessStepMapper;
+import com.funeral.enums.OrderStatusEnum;
+import com.funeral.service.ProcessStepService;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -54,6 +57,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private ProcessStepMapper processStepMapper;
+
+    @Resource
+    private ApplicationEventPublisher eventPublisher;
+    
+    @Resource
+    private ProcessStepService processStepService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -96,8 +105,16 @@ public class OrderServiceImpl implements OrderService {
         order.setContactName(orderDTO.getContactName());
         order.setContactPhone(orderDTO.getContactPhone());
         order.setAddress(orderDTO.getAddress());
-        order.setServiceTime(orderDTO.getServiceTime());
         orderMapper.insert(order);
+        
+        // 设置配送方式
+        order.setDeliveryType(orderDTO.getDeliveryType());
+        if (orderDTO.getDeliveryType() == 1) { // 配送
+            order.setAddress(orderDTO.getAddress());
+            order.setContactPhone(orderDTO.getContactPhone());
+            order.setContactName(orderDTO.getContactName());
+            order.setDeliveryTime(orderDTO.getServiceTime());
+        }
 
         return orderNo;
     }
@@ -276,10 +293,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String generateOrderQrCode(String orderNo) {
-        Orders order = getOrder(orderNo);
-        if (order == null) {
-            throw new RuntimeException("订单不存在");
-        }
+        // Orders order = getOrder(orderNo);
+        // if (order == null) {
+        //     throw new RuntimeException("订单不存在");
+        // }
         
         // 生成二维码内容（包含订单号和时间戳）
         String content = orderNo + "_" + System.currentTimeMillis();
@@ -289,11 +306,11 @@ public class OrderServiceImpl implements OrderService {
         
         // 更新订单的二维码URL
         // order.setQrCodeUrl(qrCodeUrl);
-        orderMapper.updateById(order);
+        // orderMapper.updateById(order);
         
         // 将二维码信息存入缓存，设置24小时过期
-        String cacheKey = "qrcode:" + orderNo;
-        cacheService.set(cacheKey, qrCodeUrl);
+        // String cacheKey = "qrcode:" + orderNo;
+        // cacheService.set(cacheKey, qrCodeUrl);
         
         return qrCodeUrl;
     }
@@ -330,4 +347,30 @@ public class OrderServiceImpl implements OrderService {
         cacheService.delete(cacheKey);
     }
 
+    @Transactional
+    @Override
+    public boolean updateOrderStatus(String orderNo, Integer targetStatus) {
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Orders::getOrderNo, orderNo);
+        Orders orders = orderMapper.selectOne(wrapper);
+        if (orders == null) {
+            return false;
+        }
+
+        // 检查状态转换是否合法
+        if (!OrderStatusEnum.canTransit(orders.getStatus(), targetStatus)) {
+            return false;
+        }
+
+        // 更新订单状态
+        orders.setStatus(targetStatus);
+        boolean success = orderMapper.updateById(orders) > 0;
+        
+        // 发布状态变更事件
+        // if (success) {
+        //     eventPublisher.publishEvent(new OrderStatusChangeEvent(orders));
+        // }
+        
+        return success;
+    }
 }

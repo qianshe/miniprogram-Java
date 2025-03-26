@@ -2,6 +2,8 @@ package com.funeral.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.funeral.common.cache.ProductCache;
 import com.funeral.dto.ProductDTO;
 import com.funeral.entity.Category;
 import com.funeral.entity.Product;
@@ -12,26 +14,41 @@ import com.funeral.vo.ProductVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class ProductServiceImpl implements ProductService {
-    
+public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
+
     @Resource
     private ProductMapper productMapper;
     @Resource
     private CategoryService categoryService;
+    @Resource
+    private ProductCache productCache;
 
     @Override
     public void saveProduct(ProductDTO productDTO) {
         Product product = new Product();
         BeanUtils.copyProperties(productDTO, product);
-        product.setStatus(1); // 默认上架
+        product.setIsEnabled(true); // 默认上架
         productMapper.insert(product);
+    }
+
+    @Transactional
+    @Override
+    public boolean saveProduct(Product product) {
+        boolean success = save(product);
+        if (success) {
+            productCache.saveProduct(product);
+        }
+        return success;
     }
 
     @Override
@@ -44,6 +61,22 @@ public class ProductServiceImpl implements ProductService {
         productMapper.updateById(product);
     }
 
+    @Transactional
+    @Override
+    public boolean updateStock(Long id, Integer delta) {
+        Product product = getById(id);
+        if (product == null || product.getStock() + delta < 0) {
+            return false;
+        }
+        
+        product.setStock(product.getStock() + delta);
+        boolean success = updateById(product);
+        if (success) {
+            productCache.updateStock(id, product.getStock());
+        }
+        return success;
+    }
+
     @Override
     public void deleteProduct(Long id) {
         productMapper.deleteById(id);
@@ -51,7 +84,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProduct(Long id) {
-        return productMapper.selectById(id);
+        return productCache.getProduct(id)
+                .orElseGet(() -> {
+                    Product product = getById(id);
+                    Optional.ofNullable(product).ifPresent(productCache::saveProduct);
+                    return product;
+                });
     }
 
     @Override
@@ -60,11 +98,17 @@ public class ProductServiceImpl implements ProductService {
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
         
         if (categoryId != null) {
-            queryWrapper.eq(Product::getCategoryId, categoryId);
+            queryWrapper.eq(Product::getCategory, categoryId);
         }
         
-        queryWrapper.orderByDesc(Product::getCreatedTime);
+        queryWrapper.orderByDesc(Product::getCreateTime);
         return productMapper.selectPage(pageInfo, queryWrapper);
+    }
+
+    @Override
+    public Page<Product> listByCategory(Integer category, String subCategory, Integer page, Integer size) {
+        // ...implement category filter logic...
+        return null;
     }
 
     @Override
@@ -75,9 +119,12 @@ public class ProductServiceImpl implements ProductService {
         List<Long> categoriesIds = categoryService.listCategoriesByType(type)
                 .stream().map(Category::getId)
                 .collect(Collectors.toList());
+        if (categoriesIds.isEmpty()) {
+            return new ArrayList<>();
+        }
         queryWrapper
                 // .eq(Product::getIsRecommended, true)
-                .in(Product::getCategoryId, categoriesIds).orderByDesc(Product::getCreatedTime)
+                .in(Product::getCategory, categoriesIds).orderByDesc(Product::getCreateTime)
                    .last("LIMIT 10");
         return productMapper.selectList(queryWrapper);
     }

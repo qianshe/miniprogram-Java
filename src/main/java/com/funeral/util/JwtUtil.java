@@ -33,10 +33,11 @@ public class JwtUtil {
     /**
      * 生成token
      */
-    public String generateToken(Long userId, Integer role) {
+    public String generateToken(Long userId, Integer role, String openId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("role", role);
+        claims.put("openId", openId);
         return createToken(claims);
     }
     

@@ -6,6 +6,7 @@ import com.funeral.service.CartService;
 import com.funeral.vo.CartItemVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -15,10 +16,12 @@ import java.util.List;
 @Api(tags = "购物车接口")
 @RestController
 @RequestMapping("/api/cart")
+@PreAuthorize("hasRole('USER')")
 public class CartController {
 
     @Resource
     private CartService cartService;
+
 
     @ApiOperation("添加商品到购物车")
     @PostMapping("/add")

@@ -11,13 +11,15 @@ import com.funeral.service.SmsService;
 import com.funeral.service.WxAuthService;
 import com.funeral.util.JwtUtil;
 import com.funeral.vo.LoginResultVO;
+import com.funeral.common.annotation.RateLimit;
+import com.funeral.util.AESUtil;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -42,12 +44,18 @@ public class WxAuthServiceImpl implements WxAuthService {
     @Resource
     private SmsService smsService;
     
+    @Resource
+    private AESUtil aesUtil;
+    
+    @Resource
+    private BCryptPasswordEncoder passwordEncoder;
+    
     @Override
     public LoginResultVO login(WxLoginDTO loginDTO) {
         // 调用微信接口获取openid
         String url = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid +
                 "&secret=" + secret + "&js_code=" + loginDTO.getCode() + "&grant_type=authorization_code";
-        log.info("请求微信接口获取openid: {}", url);
+        
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
         JSONObject json = JSON.parseObject(response.getBody());
         
@@ -72,17 +80,17 @@ public class WxAuthServiceImpl implements WxAuthService {
         }
         
         // 生成JWT令牌
-        String token = jwtUtil.generateToken(user.getId(), user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getRole(), openid);
         
         // 返回登录结果
         LoginResultVO result = new LoginResultVO();
         result.setUserId(user.getId());
         result.setRole(user.getRole());
         result.setToken(token);
-        result.setOpenid(openid);
         return result;
     }
 
+    @RateLimit(time = 60, count = 5)
     @Override
     public LoginResultVO phoneLogin(PhoneLoginDTO phoneLoginDTO) {
         // 验证验证码
@@ -105,14 +113,16 @@ public class WxAuthServiceImpl implements WxAuthService {
         // 用户不存在则注册新用户
         if (user == null) {
             user = new User();
-            user.setPhone(phoneLoginDTO.getPhone());
-            user.setPassword(phoneLoginDTO.getPassword());
+            user.setPhone(aesUtil.encrypt(phoneLoginDTO.getPhone()));
+            if (phoneLoginDTO.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(phoneLoginDTO.getPassword()));
+            }
             user.setRole(0); // 设置为普通用户
             userMapper.insert(user);
         }
         
         // 生成JWT令牌
-        String token = jwtUtil.generateToken(user.getId(), user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getRole(), null);
         
         // 返回登录结果
         LoginResultVO result = new LoginResultVO();
