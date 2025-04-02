@@ -15,13 +15,13 @@ public interface ProductService {
     @Transactional
     boolean saveProduct(Product product);
 
-    void updateProduct(Long id, ProductDTO productDTO);
+    boolean updateProduct(Long id, ProductDTO productDTO);
 
     @Transactional
     boolean updateStock(Long id, Integer delta);
 
     void deleteProduct(Long id);
-    Product getProduct(Long id);
+    Product getProductById(Long id);
     Page<Product> listProducts(Integer page, Integer size, Long categoryId);
 
     Page<Product> listByCategory(Integer category, String subCategory, Integer page, Integer size);
@@ -31,8 +31,6 @@ public interface ProductService {
      * @return 推荐商品列表
      */
     List<Product> getRecommendedProducts(Integer type);
-
-    Product getById(Long id);
 
     List<ProductVO> getProductsByIds(List<Long> productIds);
 }

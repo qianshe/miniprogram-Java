@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class ProductController {
     @ApiOperation("获取商品详情")
     @GetMapping("/{id}")
     public Result<Product> getProduct(@ApiParam("商品ID") @PathVariable Long id) {
-        return Result.success(productService.getProduct(id));
+        return Result.success(productService.getProductById(id));
     }
 
     @ApiOperation("分页查询商品列表")

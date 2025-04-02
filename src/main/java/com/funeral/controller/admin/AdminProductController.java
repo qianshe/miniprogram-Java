@@ -40,11 +40,10 @@ public class AdminProductController {
     
     @ApiOperation("修改商品")
     @PutMapping("/{id}")
-    public Result<Void> updateProduct(
+    public Result<Boolean> updateProduct(
             @ApiParam("商品ID") @PathVariable Long id,
             @RequestBody ProductDTO productDTO) {
-        productService.updateProduct(id, productDTO);
-        return Result.success();
+        return Result.success(productService.updateProduct(id, productDTO));
     }
     
     @ApiOperation("删除商品")
@@ -57,7 +56,7 @@ public class AdminProductController {
     @ApiOperation("获取商品详情")
     @GetMapping("/{id}")
     public Result<Product> getProduct(@ApiParam("商品ID") @PathVariable Long id) {
-        return Result.success(productService.getProduct(id));
+        return Result.success(productService.getProductById(id));
     }
     
     @ApiOperation("分页查询商品列表")
@@ -71,8 +70,8 @@ public class AdminProductController {
     
     @ApiOperation("更新商品库存")
     @PostMapping("/updateStock")
-    public Result<Void> updateStock(@RequestBody StockUpdateDTO stockUpdateDTO) {
-        Product product = productService.getProduct(stockUpdateDTO.getProductId());
+    public Result<Boolean> updateStock(@RequestBody StockUpdateDTO stockUpdateDTO) {
+        Product product = productService.getProductById(stockUpdateDTO.getProductId());
         if (product == null) {
             return Result.error("商品不存在");
         }
@@ -85,8 +84,7 @@ public class AdminProductController {
         product.setStock(newStock);
         ProductDTO productDTO = new ProductDTO();
         BeanUtils.copyProperties(product, productDTO);
-        productService.updateProduct(product.getId(), productDTO);
-        return Result.success();
+        return Result.success(productService.updateProduct(product.getId(), productDTO));
     }
     
     @ApiOperation("新增商品分类")

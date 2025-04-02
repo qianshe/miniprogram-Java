@@ -10,9 +10,9 @@ import com.funeral.vo.CartItemVO;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.ArrayList;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -30,7 +30,7 @@ public class CartServiceImpl implements CartService {
             items = loadFromDb(userId);
         }
 
-        Product product = productService.getProduct(cartDTO.getProductId());
+        Product product = productService.getProductById(cartDTO.getProductId());
         if (product == null) {
             throw new RuntimeException("商品不存在");
         }

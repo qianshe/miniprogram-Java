@@ -1,11 +1,12 @@
 package com.funeral.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @TableName("product")
@@ -15,10 +16,6 @@ public class Product {
     @ApiModelProperty(value = "商品ID", example = "1")
     private Long id;
     
-    @TableField("category_id")
-    @ApiModelProperty(value = "分类ID", example = "1")
-    private Long categoryId;
-    
     @TableField("name")
     @ApiModelProperty(value = "商品名称", example = "寿衣", required = true)
     private String name;
@@ -26,11 +23,11 @@ public class Product {
     @TableField("category")
     @ApiModelProperty(value = "商品分类", example = "0", required = true)
     private Integer category; // 0-白事，1-红事
-    
-    @TableField("sub_category")
-    @ApiModelProperty(value = "商品子分类", example = "寿衣", required = true)
-    private String subCategory; // 子分类，如：寿衣、花圈等
-    
+        
+    @TableField("category_id")
+    @ApiModelProperty(value = "子分类ID", example = "1")
+    private Long categoryId;
+
     @TableField("price")
     @ApiModelProperty(value = "商品价格", example = "1999.99", required = true)
     private BigDecimal price;
@@ -52,13 +49,10 @@ public class Product {
     private Boolean isEnabled;
     
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    private LocalDateTime createdTime;
     
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
-    
-    @Version
-    private Integer version;
+    private LocalDateTime updatedTime;
     
     @TableLogic
     private Integer deleted;
