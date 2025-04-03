@@ -34,6 +34,7 @@ CREATE TABLE user (
     nickname VARCHAR(32) COMMENT '用户昵称',
     avatar_url VARCHAR(255) COMMENT '头像URL',
     phone VARCHAR(20) COMMENT '手机号',
+    email VARCHAR(50) COMMENT '邮箱',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
@@ -41,12 +42,15 @@ CREATE TABLE user (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表';
 
 -- 商品分类表
-CREATE TABLE category (
+CREATE TABLE product_category (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
-    name VARCHAR(32) NOT NULL COMMENT '分类名称',
-    sort INT NOT NULL DEFAULT 0 COMMENT '排序号',
-    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    name VARCHAR(50) NOT NULL COMMENT '分类名称',
+    icon VARCHAR(255) COMMENT '分类图标',
+    description VARCHAR(255) COMMENT '分类描述',
+    sort INT NOT NULL DEFAULT 0 COMMENT '排序序号',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：0-禁用 1-启用',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商品分类表';
 
@@ -54,17 +58,31 @@ CREATE TABLE category (
 CREATE TABLE product (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     category_id BIGINT NOT NULL COMMENT '分类ID',
-    name VARCHAR(64) NOT NULL COMMENT '商品名称',
-    category TINYINT(1) DEFAULT 0 COMMENT '分类：0-白事 1-红事',
-    description TEXT COMMENT '商品富文本描述',
+    name VARCHAR(100) NOT NULL COMMENT '商品名称',
+    code VARCHAR(50) COMMENT '商品编码',
     price DECIMAL(10,2) NOT NULL COMMENT '商品价格',
-    image_url VARCHAR(255) COMMENT '商品图片URL',
+    market_price DECIMAL(10,2) COMMENT '市场价格',
+    cost_price DECIMAL(10,2) COMMENT '成本价格',
     stock INT NOT NULL DEFAULT 0 COMMENT '库存数量',
-    status TINYINT NOT NULL DEFAULT 1 COMMENT '商品状态：0-下架 1-上架',
+    stock_warning INT DEFAULT 10 COMMENT '库存预警值',
+    image_url VARCHAR(255) COMMENT '商品主图',
+    images TEXT COMMENT '商品图集，多个图片URL以逗号分隔',
+    brief VARCHAR(255) COMMENT '商品简介',
+    description TEXT COMMENT '商品详情（富文本）',
+    specifications TEXT COMMENT '商品规格参数，JSON格式',
+    sales INT NOT NULL DEFAULT 0 COMMENT '销量',
+    is_recommended TINYINT(1) DEFAULT 0 COMMENT '是否推荐：0-否 1-是',
+    is_hot TINYINT(1) DEFAULT 0 COMMENT '是否热销：0-否 1-是',
+    is_new TINYINT(1) DEFAULT 0 COMMENT '是否新品：0-否 1-是',
+    is_enabled TINYINT(1) NOT NULL DEFAULT 1 COMMENT '商品状态：0-下架 1-上架',
+    sort INT NOT NULL DEFAULT 0 COMMENT '排序序号',
+    version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
-    KEY idx_category (category_id)
+    KEY idx_category_id (category_id),
+    KEY idx_code (code),
+    KEY idx_enabled_sort (is_enabled, sort)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商品表';
 
 -- 订单表
@@ -73,7 +91,7 @@ CREATE TABLE orders (
     order_no VARCHAR(32) NOT NULL COMMENT '订单编号',
     user_id BIGINT NOT NULL COMMENT '用户ID',
     total_amount DECIMAL(10,2) NOT NULL COMMENT '订单总金额',
-    status TINYINT NOT NULL DEFAULT 0 COMMENT '订单状态：0-待支付 1-已支付 2-已取消 3-已退款',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '订单状态：0-待支付 1-已支付 2-已取消 3-已退款 4-已完成',
     contact_name VARCHAR(32) COMMENT '联系人姓名',
     contact_phone VARCHAR(20) COMMENT '联系人电话',
     address VARCHAR(255) COMMENT '服务地址',
@@ -85,7 +103,8 @@ CREATE TABLE orders (
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
     UNIQUE KEY uk_order_no (order_no),
-    KEY idx_user (user_id)
+    KEY idx_user (user_id),
+    KEY idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单表'; 
 
 -- 订单详情表
@@ -93,13 +112,16 @@ CREATE TABLE order_detail (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
     order_id VARCHAR(32) NOT NULL COMMENT '订单编号',
     product_id BIGINT NOT NULL COMMENT '商品ID',
-    product_name VARCHAR(64) NOT NULL COMMENT '商品名称',
+    product_name VARCHAR(100) NOT NULL COMMENT '商品名称',
+    product_image VARCHAR(255) COMMENT '商品图片',
     product_price DECIMAL(10,2) NOT NULL COMMENT '商品价格',
     quantity INT NOT NULL COMMENT '购买数量',
+    total_price DECIMAL(10,2) NOT NULL COMMENT '小计金额',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
-    KEY idx_order (order_id)
+    KEY idx_order (order_id),
+    KEY idx_product (product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单详情表';
 
 -- 支付记录表
@@ -109,18 +131,20 @@ CREATE TABLE payment (
     transaction_id VARCHAR(64) COMMENT '微信支付交易号',
     amount DECIMAL(10,2) NOT NULL COMMENT '支付金额',
     status TINYINT NOT NULL DEFAULT 0 COMMENT '支付状态：0-未支付 1-支付成功 2-支付失败',
+    pay_time DATETIME COMMENT '支付时间',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
-    KEY idx_order_no (order_no)
+    KEY idx_order_no (order_no),
+    KEY idx_transaction_id (transaction_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '支付记录表';
 
 -- 初始化商品分类数据
-INSERT INTO category (name, sort) VALUES 
-('殡葬用品', 1),
-('花圈花篮', 2),
-('殡葬服务', 3),
-('代办服务', 4);
+INSERT INTO product_category (name, icon, sort, status) VALUES 
+('殡葬用品', 'icon-binzang', 1, 1),
+('花圈花篮', 'icon-huaquan', 2, 1),
+('殡葬服务', 'icon-fuwu', 3, 1),
+('代办服务', 'icon-daiban', 4, 1);
 
 -- 流程步骤表
 CREATE TABLE process_step (
@@ -132,22 +156,38 @@ CREATE TABLE process_step (
     sort INT NOT NULL DEFAULT 0 COMMENT '排序号',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除'
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
+    KEY idx_type_sort (type, sort)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '流程步骤表';
 
-
-CREATE TABLE `cart_item` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
-  `product_id` bigint(20) NOT NULL COMMENT '商品ID',
-  `product_name` varchar(100) NOT NULL COMMENT '商品名称',
-  `product_image` varchar(255) DEFAULT NULL COMMENT '商品图片',
-  `price` decimal(10,2) NOT NULL COMMENT '单价',
-  `quantity` int(11) NOT NULL COMMENT '数量',
-  `total_price` decimal(10,2) NOT NULL COMMENT '总价',
-  `create_time` datetime NOT NULL COMMENT '创建时间',
-  `update_time` datetime NOT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_user_id` (`user_id`),
-  KEY `idx_product_id` (`product_id`)
+-- 购物车表
+CREATE TABLE cart_item (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    product_id BIGINT NOT NULL COMMENT '商品ID',
+    product_name VARCHAR(100) NOT NULL COMMENT '商品名称',
+    product_image VARCHAR(255) COMMENT '商品图片',
+    price DECIMAL(10,2) NOT NULL COMMENT '单价',
+    quantity INT NOT NULL COMMENT '数量',
+    total_price DECIMAL(10,2) NOT NULL COMMENT '总价',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    KEY idx_user_id (user_id),
+    KEY idx_product_id (product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='购物车项表';
+
+-- 微信二维码登录令牌表
+CREATE TABLE wechat_qr_login_token (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    token VARCHAR(64) NOT NULL COMMENT '令牌值',
+    openid VARCHAR(64) COMMENT '微信openid',
+    user_info TEXT COMMENT '用户信息JSON',
+    status TINYINT(1) NOT NULL DEFAULT 0 COMMENT '状态：0-未登录 1-已登录 2-已过期 3-登录失败',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    expire_time DATETIME NOT NULL COMMENT '过期时间',
+    UNIQUE KEY uk_token (token),
+    KEY idx_openid (openid),
+    KEY idx_expire_time (expire_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '微信二维码登录令牌表';
