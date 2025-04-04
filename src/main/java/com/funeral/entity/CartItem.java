@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @TableName("cart_item")
@@ -38,8 +38,8 @@ public class CartItem {
     private BigDecimal totalPrice;
     
     @TableField("create_time")
-    private Date createTime;
+    private LocalDateTime createTime;
     
     @TableField("update_time")
-    private Date updateTime;
+    private LocalDateTime updateTime;
 }

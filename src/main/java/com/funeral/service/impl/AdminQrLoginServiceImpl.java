@@ -2,9 +2,12 @@ package com.funeral.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.funeral.config.WechatQrLoginConfig;
 import com.funeral.entity.User;
+import com.funeral.entity.WechatQrLoginToken;
 import com.funeral.mapper.UserMapper;
+import com.funeral.mapper.WechatQrLoginTokenMapper;
 import com.funeral.service.AdminQrLoginService;
 import com.funeral.util.HttpUtil;
 import com.funeral.util.JwtUtil;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -24,13 +28,16 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
-public class AdminQrLoginServiceImpl implements AdminQrLoginService {
+public class AdminQrLoginServiceImpl extends ServiceImpl<WechatQrLoginTokenMapper, WechatQrLoginToken> implements AdminQrLoginService {
     
     @Resource
     private WechatQrLoginConfig wechatQrLoginConfig;
     
     @Resource
     private UserMapper userMapper;
+    
+    @Resource
+    private WechatQrLoginTokenMapper wechatQrLoginTokenMapper;
     
     @Resource
     private JwtUtil jwtUtil;
@@ -41,6 +48,11 @@ public class AdminQrLoginServiceImpl implements AdminQrLoginService {
         String token = UUID.randomUUID().toString().replace("-", "");
         
         // 保存登录令牌到数据库
+        WechatQrLoginToken qrLoginToken = new WechatQrLoginToken();
+        qrLoginToken.setToken(token);
+        qrLoginToken.setStatus(0); // 0-待登录
+        qrLoginToken.setExpireTime(LocalDateTime.now().plusSeconds(wechatQrLoginConfig.getQrCodeExpire()));
+        wechatQrLoginTokenMapper.insert(qrLoginToken);
         
         // 构建微信授权URL
         String authorizeUrl = wechatQrLoginConfig.getQrCodeUrl() + 
@@ -63,10 +75,57 @@ public class AdminQrLoginServiceImpl implements AdminQrLoginService {
     @Override
     public WechatQrLoginStatusVO checkLoginStatus(String token) {
         // 查询登录令牌
-
+        WechatQrLoginToken qrLoginToken = wechatQrLoginTokenMapper.selectOne(
+                new LambdaQueryWrapper<WechatQrLoginToken>()
+                        .eq(WechatQrLoginToken::getToken, token)
+        );
         
         WechatQrLoginStatusVO statusVO = new WechatQrLoginStatusVO();
         statusVO.setToken(token);
+        
+        if (qrLoginToken == null) {
+            statusVO.setStatus(2); // 已过期
+            statusVO.setMessage("登录令牌不存在或已过期");
+            return statusVO;
+        }
+        
+        if (qrLoginToken.getExpireTime().isBefore(LocalDateTime.now())) {
+            statusVO.setStatus(2); // 已过期
+            statusVO.setMessage("登录令牌已过期");
+            return statusVO;
+        }
+        
+        statusVO.setStatus(qrLoginToken.getStatus());
+        switch (qrLoginToken.getStatus()) {
+            case 0:
+                statusVO.setMessage("等待扫码");
+                break;
+            case 1:
+                statusVO.setMessage("登录成功");
+                // 如果已登录，查询用户信息
+                if (qrLoginToken.getOpenid() != null) {
+                    User user = userMapper.selectOne(
+                            new LambdaQueryWrapper<User>()
+                                    .eq(User::getOpenid, qrLoginToken.getOpenid())
+                    );
+                    if (user != null) {
+                        statusVO.setUserId(user.getId());
+                        statusVO.setRole(user.getRole());
+                        // 生成JWT令牌
+                        String jwtToken = jwtUtil.generateToken(user.getId(), user.getRole(), null);
+                        statusVO.setJwtToken(jwtToken);
+                    }
+                }
+                break;
+            case 2:
+                statusVO.setMessage("已过期");
+                break;
+            case 3:
+                statusVO.setMessage("登录失败(非管理员)");
+                break;
+            default:
+                statusVO.setMessage("未知状态");
+        }
         
         return statusVO;
     }
@@ -75,6 +134,15 @@ public class AdminQrLoginServiceImpl implements AdminQrLoginService {
     @Transactional(rollbackFor = Exception.class)
     public boolean handleWechatCallback(String code, String state) {
         // 查询登录令牌
+        WechatQrLoginToken qrLoginToken = wechatQrLoginTokenMapper.selectOne(
+                new LambdaQueryWrapper<WechatQrLoginToken>()
+                        .eq(WechatQrLoginToken::getToken, state)
+        );
+        
+        if (qrLoginToken == null || qrLoginToken.getExpireTime().isBefore(LocalDateTime.now())) {
+            log.error("登录令牌不存在或已过期：{}", state);
+            return false;
+        }
         
         try {
             // 获取微信access_token
@@ -117,11 +185,18 @@ public class AdminQrLoginServiceImpl implements AdminQrLoginService {
             // 如果用户不存在或者用户不是管理员，则登录失败
             if (user == null || user.getRole() != 1) {
                 // 更新登录令牌状态为登录失败（非管理员）
+                qrLoginToken.setStatus(3);
+                wechatQrLoginTokenMapper.updateById(qrLoginToken);
                 
                 return true;
             }
             
             // 更新登录令牌
+            qrLoginToken.setOpenid(openid);
+            qrLoginToken.setUserInfo(userInfo.toJSONString());
+            qrLoginToken.setStatus(1); // 登录成功
+            wechatQrLoginTokenMapper.updateById(qrLoginToken);
+            
             log.info("微信扫码登录成功：openid={}, userId={}, role={}", openid, user.getId(), user.getRole());
             
             return true;

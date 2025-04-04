@@ -1,9 +1,10 @@
 package com.funeral.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -34,10 +35,10 @@ public class ProcessStep {
     @TableField("sort")
     private Integer sort;
 
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(value = "created_time", fill = FieldFill.INSERT)
     private LocalDateTime createdTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "updated_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedTime;
 
     @TableLogic

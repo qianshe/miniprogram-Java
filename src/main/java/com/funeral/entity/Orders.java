@@ -1,8 +1,8 @@
 package com.funeral.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -47,6 +47,12 @@ public class Orders {
 
     @TableField("delivery_time")
     private LocalDateTime deliveryTime;
+
+    @TableField("service_time")
+    private LocalDateTime serviceTime;
+
+    @TableField("remark")
+    private String remark;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;

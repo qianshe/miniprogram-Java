@@ -3,6 +3,7 @@ package com.funeral.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -16,8 +17,10 @@ public class OrderDetail {
     private String orderId;
     private Long productId;
     private String productName;
+    private String productImage;
     private BigDecimal productPrice;
     private Integer quantity;
+    private BigDecimal totalPrice;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;
