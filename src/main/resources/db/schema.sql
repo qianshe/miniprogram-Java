@@ -2,6 +2,7 @@
 CREATE DATABASE IF NOT EXISTS funeral_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 USE funeral_db;
+
 -- 角色表
 CREATE TABLE role (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -47,11 +48,13 @@ CREATE TABLE product_category (
     name VARCHAR(50) NOT NULL COMMENT '分类名称',
     icon VARCHAR(255) COMMENT '分类图标',
     description VARCHAR(255) COMMENT '分类描述',
+    parent_id BIGINT NOT NULL DEFAULT 0 COMMENT '父分类ID，0表示顶级分类',
     sort INT NOT NULL DEFAULT 0 COMMENT '排序序号',
     status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：0-禁用 1-启用',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除'
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
+    INDEX idx_parent_id (parent_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '商品分类表';
 
 -- 商品表
@@ -105,7 +108,7 @@ CREATE TABLE orders (
     UNIQUE KEY uk_order_no (order_no),
     KEY idx_user (user_id),
     KEY idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单表'; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '订单表';
 
 -- 订单详情表
 CREATE TABLE order_detail (
@@ -138,13 +141,6 @@ CREATE TABLE payment (
     KEY idx_order_no (order_no),
     KEY idx_transaction_id (transaction_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '支付记录表';
-
--- 初始化商品分类数据
-INSERT INTO product_category (name, icon, sort, status) VALUES 
-('殡葬用品', 'icon-binzang', 1, 1),
-('花圈花篮', 'icon-huaquan', 2, 1),
-('殡葬服务', 'icon-fuwu', 3, 1),
-('代办服务', 'icon-daiban', 4, 1);
 
 -- 流程步骤表
 CREATE TABLE process_step (
@@ -190,4 +186,4 @@ CREATE TABLE wechat_qr_login_token (
     UNIQUE KEY uk_token (token),
     KEY idx_openid (openid),
     KEY idx_expire_time (expire_time)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '微信二维码登录令牌表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '微信二维码登录令牌表'; 

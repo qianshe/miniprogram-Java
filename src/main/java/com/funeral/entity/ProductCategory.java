@@ -30,6 +30,10 @@ public class ProductCategory {
     @ApiModelProperty(value = "分类描述", example = "各类婚庆婚礼必备用品")
     private String description;
     
+    @TableField("parent_id")
+    @ApiModelProperty(value = "父分类ID，0表示顶级分类", example = "0")
+    private Long parentId;
+    
     @TableField("type")
     @ApiModelProperty(value = "分类类型：0-白事 1-红事", example = "1")
     private Integer type;

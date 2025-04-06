@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -111,6 +114,61 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                         .eq(ProductCategory::getStatus, 1)
                         .orderByAsc(ProductCategory::getSort)
         );
+    }
+    
+    @Override
+    public List<ProductCategory> listProductCategoriesByParentId(Long parentId) {
+        log.debug("获取父分类ID为 {} 的子分类列表", parentId);
+        
+        return productCategoryMapper.selectList(
+                new LambdaQueryWrapper<ProductCategory>()
+                        .eq(ProductCategory::getParentId, parentId)
+                        .eq(ProductCategory::getStatus, 1)
+                        .orderByAsc(ProductCategory::getSort)
+        );
+    }
+    
+    @Override
+    public List<ProductCategory> getCategoryTree() {
+        log.debug("获取分类树结构");
+        
+        // 获取所有分类
+        List<ProductCategory> allCategories = productCategoryMapper.selectList(
+                new LambdaQueryWrapper<ProductCategory>()
+                        .eq(ProductCategory::getStatus, 1)
+                        .orderByAsc(ProductCategory::getSort)
+        );
+        
+        // 构建父子关系
+        Map<Long, List<ProductCategory>> parentMap = new HashMap<>();
+        for (ProductCategory category : allCategories) {
+            Long parentId = category.getParentId();
+            if (!parentMap.containsKey(parentId)) {
+                parentMap.put(parentId, new ArrayList<>());
+            }
+            parentMap.get(parentId).add(category);
+        }
+        
+        // 获取顶级分类
+        List<ProductCategory> rootCategories = parentMap.getOrDefault(0L, new ArrayList<>());
+        
+        // 递归构建树结构
+        buildCategoryTree(rootCategories, parentMap);
+        
+        return rootCategories;
+    }
+    
+    /**
+     * 递归构建分类树
+     */
+    private void buildCategoryTree(List<ProductCategory> parentCategories, Map<Long, List<ProductCategory>> parentMap) {
+        for (ProductCategory parent : parentCategories) {
+            List<ProductCategory> children = parentMap.getOrDefault(parent.getId(), new ArrayList<>());
+            if (!children.isEmpty()) {
+                // 递归构建子分类的树结构
+                buildCategoryTree(children, parentMap);
+            }
+        }
     }
     
     @Override

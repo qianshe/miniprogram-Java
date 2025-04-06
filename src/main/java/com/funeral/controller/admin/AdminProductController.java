@@ -142,4 +142,17 @@ public class AdminProductController {
         productCategory.setId(id);
         return Result.success(categoryService.updateProductCategory(productCategory));
     }
+    
+    @ApiOperation("根据父分类ID获取子分类")
+    @GetMapping("/product-categories/children")
+    public Result<List<ProductCategory>> listProductCategoriesByParentId(
+            @ApiParam("父分类ID，0表示顶级分类") @RequestParam(defaultValue = "0") Long parentId) {
+        return Result.success(categoryService.listProductCategoriesByParentId(parentId));
+    }
+
+    @ApiOperation("获取分类树结构")
+    @GetMapping("/product-categories/tree")
+    public Result<List<ProductCategory>> getCategoryTree() {
+        return Result.success(categoryService.getCategoryTree());
+    }
 } 

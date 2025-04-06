@@ -52,6 +52,19 @@ public interface CategoryService extends IService<Category> {
     List<ProductCategory> listProductCategories();
 
     /**
+     * 根据父分类ID获取子分类列表
+     * @param parentId 父分类ID，0表示顶级分类
+     * @return 子分类列表
+     */
+    List<ProductCategory> listProductCategoriesByParentId(Long parentId);
+
+    /**
+     * 获取分类树结构
+     * @return 分类树结构
+     */
+    List<ProductCategory> getCategoryTree();
+
+    /**
      * 保存新版商品分类
      * @param productCategory 商品分类
      * @return 是否成功
