@@ -28,10 +28,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     private ProductCategoryMapper productCategoryMapper;
 
     @Override
-    public void saveCategory(CategoryDTO categoryDTO) {
+    public boolean saveCategory(CategoryDTO categoryDTO) {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
-        categoryMapper.insert(category);
+        return categoryMapper.insert(category) > 0;
     }
 
     @Override
@@ -99,6 +99,17 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 new LambdaQueryWrapper<Category>()
                         .eq(Category::getType, type)
                         .orderByAsc(Category::getSort)
+        );
+    }
+    
+    @Override
+    public List<ProductCategory> listProductCategories() {
+        log.debug("获取所有商品分类列表（新版）");
+        
+        return productCategoryMapper.selectList(
+                new LambdaQueryWrapper<ProductCategory>()
+                        .eq(ProductCategory::getStatus, 1)
+                        .orderByAsc(ProductCategory::getSort)
         );
     }
     

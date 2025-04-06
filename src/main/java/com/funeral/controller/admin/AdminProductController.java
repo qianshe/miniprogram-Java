@@ -90,9 +90,8 @@ public class AdminProductController {
     
     @ApiOperation("新增商品分类(旧版)")
     @PostMapping("/categories")
-    public Result<Void> saveCategory(@RequestBody CategoryDTO categoryDTO) {
-        categoryService.saveCategory(categoryDTO);
-        return Result.success();
+    public Result<Boolean> saveCategory(@RequestBody CategoryDTO categoryDTO) {
+        return Result.success(categoryService.saveCategory(categoryDTO));
     }
     
     @ApiOperation("修改商品分类(旧版)")
@@ -123,18 +122,10 @@ public class AdminProductController {
         return Result.success(categoryService.listCategories());
     }
     
-    @ApiOperation("获取指定类型的分类列表(旧版兼容)")
-    @GetMapping("/categories/type/{type}")
-    public Result<List<Category>> listCategoriesByType(
-            @ApiParam("分类类型：0-白事，1-红事") @PathVariable Integer type) {
-        return Result.success(categoryService.listByType(type));
-    }
-    
-    @ApiOperation("获取指定类型的分类列表(新版)")
-    @GetMapping("/product-categories/type/{type}")
-    public Result<List<ProductCategory>> listProductCategories(
-            @ApiParam("分类类型：0-白事，1-红事") @PathVariable Integer type) {
-        return Result.success(categoryService.listProductCategories(type));
+    @ApiOperation("获取所有商品分类(新版)")
+    @GetMapping("/product-categories")
+    public Result<List<ProductCategory>> listProductCategories() {
+        return Result.success(categoryService.listProductCategories());
     }
     
     @ApiOperation("新增商品分类(新版)")

@@ -64,17 +64,9 @@ public class ProductController {
         return Result.success(categoryService.getCategory(id));
     }
     
-    @ApiOperation("按类型获取分类列表(旧版兼容)")
-    @GetMapping("/categories/type/{type}")
-    public Result<List<Category>> listCategoriesByType(
-            @ApiParam("分类类型：0-白事，1-红事") @PathVariable Integer type) {
-        return Result.success(categoryService.listByType(type));
-    }
-    
-    @ApiOperation("按类型获取分类列表(新版)")
-    @GetMapping("/product-categories/type/{type}")
-    public Result<List<ProductCategory>> listProductCategories(
-            @ApiParam("分类类型：0-白事，1-红事") @PathVariable Integer type) {
-        return Result.success(categoryService.listProductCategories(type));
+    @ApiOperation("获取所有商品分类(新版)")
+    @GetMapping("/product-categories")
+    public Result<List<ProductCategory>> listProductCategories() {
+        return Result.success(categoryService.listProductCategories());
     }
 } 
