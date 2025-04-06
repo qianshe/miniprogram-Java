@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.funeral.common.cache.ProductCache;
 import com.funeral.dto.ProductDTO;
-import com.funeral.entity.Category;
 import com.funeral.entity.Product;
+import com.funeral.entity.ProductCategory;
 import com.funeral.mapper.ProductMapper;
 import com.funeral.service.CategoryService;
 import com.funeral.service.ProductService;
@@ -166,8 +166,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
         
         // 查询指定分类下的商品
-        List<Long> categoryIds = categoryService.listCategoriesByType(category)
-                .stream().map(Category::getId)
+        List<Long> categoryIds = categoryService.listProductCategoriesByParentId(Long.valueOf(category))
+                .stream().map(ProductCategory::getId)
                 .collect(Collectors.toList());
                 
         if (!categoryIds.isEmpty()) {
@@ -190,8 +190,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
         
         // 获取对应类型的分类ID列表
-        List<Long> categoryIds = categoryService.listCategoriesByType(type)
-                .stream().map(Category::getId)
+        List<Long> categoryIds = categoryService.listProductCategoriesByParentId(Long.valueOf(type))
+                .stream().map(ProductCategory::getId)
                 .collect(Collectors.toList());
                 
         if (categoryIds.isEmpty()) {
