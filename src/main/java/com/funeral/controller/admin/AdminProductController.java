@@ -7,6 +7,7 @@ import com.funeral.dto.ProductDTO;
 import com.funeral.dto.StockUpdateDTO;
 import com.funeral.entity.Category;
 import com.funeral.entity.Product;
+import com.funeral.entity.ProductCategory;
 import com.funeral.service.CategoryService;
 import com.funeral.service.ProductService;
 import io.swagger.annotations.Api;
@@ -87,14 +88,14 @@ public class AdminProductController {
         return Result.success(productService.updateProduct(product.getId(), productDTO));
     }
     
-    @ApiOperation("新增商品分类")
+    @ApiOperation("新增商品分类(旧版)")
     @PostMapping("/categories")
     public Result<Void> saveCategory(@RequestBody CategoryDTO categoryDTO) {
         categoryService.saveCategory(categoryDTO);
         return Result.success();
     }
     
-    @ApiOperation("修改商品分类")
+    @ApiOperation("修改商品分类(旧版)")
     @PutMapping("/categories/{id}")
     public Result<Void> updateCategory(
             @ApiParam("分类ID") @PathVariable Long id,
@@ -110,15 +111,44 @@ public class AdminProductController {
         return Result.success();
     }
     
-    @ApiOperation("获取分类详情")
+    @ApiOperation("获取分类详情(旧版)")
     @GetMapping("/categories/{id}")
     public Result<Category> getCategory(@ApiParam("分类ID") @PathVariable Long id) {
         return Result.success(categoryService.getCategory(id));
     }
     
-    @ApiOperation("获取所有分类")
+    @ApiOperation("获取所有分类(旧版)")
     @GetMapping("/categories")
     public Result<List<Category>> listCategories() {
         return Result.success(categoryService.listCategories());
+    }
+    
+    @ApiOperation("获取指定类型的分类列表(旧版兼容)")
+    @GetMapping("/categories/type/{type}")
+    public Result<List<Category>> listCategoriesByType(
+            @ApiParam("分类类型：0-白事，1-红事") @PathVariable Integer type) {
+        return Result.success(categoryService.listByType(type));
+    }
+    
+    @ApiOperation("获取指定类型的分类列表(新版)")
+    @GetMapping("/product-categories/type/{type}")
+    public Result<List<ProductCategory>> listProductCategories(
+            @ApiParam("分类类型：0-白事，1-红事") @PathVariable Integer type) {
+        return Result.success(categoryService.listProductCategories(type));
+    }
+    
+    @ApiOperation("新增商品分类(新版)")
+    @PostMapping("/product-categories")
+    public Result<Boolean> saveProductCategory(@RequestBody ProductCategory productCategory) {
+        return Result.success(categoryService.saveProductCategory(productCategory));
+    }
+    
+    @ApiOperation("修改商品分类(新版)")
+    @PutMapping("/product-categories/{id}")
+    public Result<Boolean> updateProductCategory(
+            @ApiParam("分类ID") @PathVariable Long id,
+            @RequestBody ProductCategory productCategory) {
+        productCategory.setId(id);
+        return Result.success(categoryService.updateProductCategory(productCategory));
     }
 } 
