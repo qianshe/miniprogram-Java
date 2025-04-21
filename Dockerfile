@@ -15,11 +15,12 @@ COPY target/*.jar app.jar
 EXPOSE 8080
 
 # 设置环境变量
-# 如果docker没有配置自定义网络，则需要使用宿主机IP地址
-# 如果docker配置了自定义网络，可直接使用容器名
- ENV SPRING_DATASOURCE_URL=jdbc:mysql://172.17.0.2:3306/funeral_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-# ENV SPRING_DATASOURCE_USERNAME=root
-# ENV SPRING_DATASOURCE_PASSWORD=qianshe_password
+# 当使用自定义网络时，可以直接使用容器名称进行通信
+# 这些默认值可以在运行容器时通过-e参数覆盖
+ENV SPRING_DATASOURCE_URL=jdbc:mysql://mysql-container:3306/funeral_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+ENV SPRING_DATASOURCE_USERNAME=root
+ENV SPRING_DATASOURCE_PASSWORD=qianshe_password
+ENV SPRING_PROFILES_ACTIVE=prod
 
 # 启动命令
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

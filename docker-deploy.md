@@ -16,17 +16,22 @@ docker build -t qianshe-api:0.0.1 .
 
 启动容器的基本命令：
 ```bash
+# 创建自定义网络（如果尚未创建）
+docker network create qianshe-network
+
+# 启动容器并加入网络
 docker run -d \
   --name qianshe-app \
+  --network qianshe-network \
   -p 8080:8080 \
   -e SPRING_PROFILES_ACTIVE=prod \
-  -e MYSQL_HOST=your-mysql-host \
-  -e MYSQL_PORT=3306 \
-  -e MYSQL_DATABASE=qianshe \
-  -e MYSQL_USERNAME=root \
-  -e MYSQL_PASSWORD=your-password \
+  -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql-container:3306/funeral_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai \
+  -e SPRING_DATASOURCE_USERNAME=root \
+  -e SPRING_DATASOURCE_PASSWORD=qianshe_password \
   qianshe-miniprogram:1.0
 ```
+
+> 注意：当使用自定义网络时，可以直接使用容器名称（如`mysql-container`）作为主机名进行通信，无需使用IP地址。
 
 ### 重要参数说明
 
@@ -52,3 +57,20 @@ docker logs -f qianshe-app
 docker stop qianshe-app
 docker rm qianshe-app
 ```
+
+### 将已运行容器加入网络
+
+如果容器已经在运行，可以使用以下命令将其加入网络：
+
+```bash
+# 创建网络（如果尚未创建）
+docker network create qianshe-network
+
+# 将已运行的容器加入网络
+docker network connect qianshe-network qianshe-app
+
+# 查看网络详情
+docker network inspect qianshe-network
+```
+
+更多网络配置详情，请参考 [Docker网络配置指南](./docker-network-guide.md)。

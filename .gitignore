@@ -28,6 +28,7 @@ replay_pid*
 .cursor/
 target/
 file/
+logs/
 **/data.sql
 
 **/application.yml
