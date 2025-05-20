@@ -7,35 +7,36 @@ import com.funeral.dto.OrderDTO;
 import com.funeral.dto.OrderExportDTO;
 import com.funeral.dto.OrderItemDTO;
 import com.funeral.dto.OrderStatisticsDTO;
-import com.funeral.entity.Orders;
 import com.funeral.entity.OrderDetail;
+import com.funeral.entity.Orders;
 import com.funeral.entity.Product;
-import com.funeral.mapper.OrderMapper;
+import com.funeral.enums.OrderStatusEnum;
 import com.funeral.mapper.OrderDetailMapper;
+import com.funeral.mapper.OrderMapper;
+import com.funeral.mapper.ProcessStepMapper;
 import com.funeral.mapper.ProductMapper;
+import com.funeral.service.CacheService;
 import com.funeral.service.OrderService;
+import com.funeral.service.ProcessStepService;
+import com.funeral.util.QrCodeUtil;
+import com.funeral.vo.OrderDetailVO;
 import com.funeral.vo.OrderItemVO;
+import com.funeral.vo.OrderListVO;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.UUID;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-import com.funeral.vo.OrderListVO;
-import com.funeral.vo.OrderDetailVO;
-import com.funeral.util.QrCodeUtil;
-import com.funeral.service.CacheService;
-import com.funeral.mapper.ProcessStepMapper;
-import com.funeral.enums.OrderStatusEnum;
-import com.funeral.service.ProcessStepService;
-import org.springframework.context.ApplicationEventPublisher;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -147,23 +148,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Orders getOrder(String orderNo) {
-        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Orders::getOrderNo, orderNo);
-        return orderMapper.selectOne(wrapper);
+        return orderMapper.getOrderByNo(orderNo);
     }
 
     @Override
     public Page<OrderListVO> listUserOrders(Long userId, Long orderStatus, Integer page, Integer size) {
-        Page<Orders> pageParam = new Page<>(page, size);
-        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Orders::getUserId, userId);
-        // 校验 订单状态
-        if (orderStatus != null) {
-            wrapper.eq(Orders::getStatus, orderStatus);
-        }
-        wrapper.orderByDesc(Orders::getCreatedTime);
-        
-        Page<Orders> ordersPage = orderMapper.selectPage(pageParam, wrapper);
+
+        Page<Orders> ordersPage = orderMapper.getOrdersByPage(userId, orderStatus, page, size);
         
         // 转换为VO对象
         Page<OrderListVO> voPage = new Page<>();
