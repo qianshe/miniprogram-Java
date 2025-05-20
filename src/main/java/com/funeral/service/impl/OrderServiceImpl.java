@@ -174,11 +174,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderStatisticsDTO getOrderStatistics(LocalDateTime startTime, LocalDateTime endTime) {
-        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
-        wrapper.between(startTime != null && endTime != null,
-                Orders::getCreatedTime, startTime, endTime);
-
-        List<Orders> orders = orderMapper.selectList(wrapper);
+        List<Orders> orders = orderMapper.selectListByTimeRange(startTime, endTime);
 
         OrderStatisticsDTO statistics = new OrderStatisticsDTO();
         statistics.setTotalOrders(orders.size());
@@ -195,11 +191,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void exportOrders(LocalDateTime startTime, LocalDateTime endTime, HttpServletResponse response) throws IOException {
-        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
-        wrapper.between(startTime != null && endTime != null,
-                Orders::getCreatedTime, startTime, endTime);
 
-        List<Orders> orders = orderMapper.selectList(wrapper);
+        List<Orders> orders = orderMapper.selectListByTimeRange(startTime, endTime);
         List<OrderExportDTO> exportList = new ArrayList<>();
 
         for (Orders order : orders) {
@@ -341,9 +334,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public boolean updateOrderStatus(String orderNo, Integer targetStatus) {
-        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Orders::getOrderNo, orderNo);
-        Orders orders = orderMapper.selectOne(wrapper);
+        Orders orders = getOrder(orderNo);
         if (orders == null) {
             return false;
         }

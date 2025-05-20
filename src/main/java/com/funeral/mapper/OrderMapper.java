@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.funeral.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Mapper
 public interface OrderMapper extends BaseMapper<Orders> {
 
@@ -26,4 +29,12 @@ public interface OrderMapper extends BaseMapper<Orders> {
         wrapper.orderByDesc(Orders::getCreatedTime);
         return this.selectPage(pageParam, wrapper);
     }
-} 
+
+    default List<Orders> selectListByTimeRange(LocalDateTime startTime, LocalDateTime endTime){
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+        wrapper.between(Orders::getCreatedTime, startTime, endTime);
+        return this.selectList(wrapper);
+    }
+
+
+}
