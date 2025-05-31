@@ -13,17 +13,14 @@ import com.funeral.entity.Product;
 import com.funeral.enums.OrderStatusEnum;
 import com.funeral.mapper.OrderDetailMapper;
 import com.funeral.mapper.OrderMapper;
-import com.funeral.mapper.ProcessStepMapper;
 import com.funeral.mapper.ProductMapper;
 import com.funeral.service.CacheService;
 import com.funeral.service.OrderService;
-import com.funeral.service.ProcessStepService;
 import com.funeral.util.QrCodeUtil;
 import com.funeral.vo.OrderDetailVO;
 import com.funeral.vo.OrderItemVO;
 import com.funeral.vo.OrderListVO;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,15 +52,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private CacheService cacheService;
-
-    @Resource
-    private ProcessStepMapper processStepMapper;
-
-    @Resource
-    private ApplicationEventPublisher eventPublisher;
-    
-    @Resource
-    private ProcessStepService processStepService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
