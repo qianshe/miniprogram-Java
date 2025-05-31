@@ -20,11 +20,11 @@ import com.funeral.util.QrCodeUtil;
 import com.funeral.vo.OrderDetailVO;
 import com.funeral.vo.OrderItemVO;
 import com.funeral.vo.OrderListVO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -36,22 +36,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    @Resource
-    private OrderMapper orderMapper;
+    private final OrderMapper orderMapper;
 
-    @Resource
-    private OrderDetailMapper orderDetailMapper;
+    private final OrderDetailMapper orderDetailMapper;
 
-    @Resource
-    private ProductMapper productMapper;
+    private final ProductMapper productMapper;
 
-    @Resource
-    private QrCodeUtil qrCodeUtil;
+    private final QrCodeUtil qrCodeUtil;
 
-    @Resource
-    private CacheService cacheService;
+    private final CacheService cacheService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
